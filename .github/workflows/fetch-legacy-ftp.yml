@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       remote_root:
-        description: "Site root containing 00 and wp-content"
+        description: "FTP site root (usually / after Directory jail fix — NOT /home/...)"
         required: true
-        default: "/home/fengrmkw/buycarl.com"
+        default: "/"
       include_plugins:
-        description: "Also download wp-content/plugins"
+        description: "Also download wp-content/plugins (slow — leave false)"
         type: boolean
-        default: true
+        default: false
       mode:
         description: "Connection mode"
         type: choice
