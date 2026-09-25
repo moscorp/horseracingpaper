@@ -170,7 +170,7 @@ jobs:
                   if ok:
                       print(f"blind cwd found: {ok}")
                       return pwd, names + ok
-              raise SystemExit("Could not find a folder containing 00 / wp-content via FTP")
+              raise RuntimeError("Could not find a folder containing 00 / wp-content via FTP")
 
           def mirror_ftp(ftp, remote_path: str, local: Path, depth=0, only=None):
               """only: optional set of top-level names to keep when remote_path endswith wp-content"""
