@@ -23,14 +23,19 @@ Repo → Settings → Secrets and variables → Actions:
 
 Why IP: `ftp.fengins.com` currently resolves to **Cloudflare**, which does not terminate your Namecheap Pure-FTPd. Port 21 on `209.74.67.142` is open (FTPS-capable). SSH-style access is on **21098** if needed later.
 
-### Critical: FTP account Directory must be the site root
+### Critical: FTP account Directory + remote_root
 
-System path is `/home/fengrmkw/buycarl.com/00`, but additional FTP users are **jailed**.  
-If login only shows `.ftpquota`, Actions cannot see `00`.
+System disk path is `/home/fengrmkw/buycarl.com/00`, but after fixing the FTP account
+**Directory**, FTP often sees that folder as **`/`**.
 
-**Fix in Namecheap cPanel → FTP Accounts → manage `buycarlftp@buycarl.com`:**
-- Set **Directory** to `/home/fengrmkw/buycarl.com` (folder that contains `00` + `wp-content`)
-- Or use the **primary cPanel** FTP/SFTP username instead and update `FTP_USERNAME` / `FTP_PASSWORD`
+Confirmed from a long cancelled run: login `/` listed `00`, `wp-content`, **`wp-content.zip` (huge)**, and core WP files.
+
+**Always:**
+- Prefer `remote_root=/` for Actions
+- Never download `wp-content.zip`
+- Prefer workflow **Fetch legacy 00 only** first
+
+If login only shows `.ftpquota`, fix cPanel FTP Directory to `/home/fengrmkw/buycarl.com`.
 
 If you created a secret literally named `FTP`, rename or add **`FTP_USERNAME`** — workflows expect `FTP_USERNAME`.
 

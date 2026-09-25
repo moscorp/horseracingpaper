@@ -1,7 +1,8 @@
 name: Fetch legacy 00 only
 
-# Fast path: mirror only /home/.../buycarl.com/00 (no themes/plugins).
-# Use when full fetch is too slow or times out.
+# Fast path: download ONLY the /00 folder from FTP jail root.
+# Do NOT download wp-content.zip or full WordPress tree.
+# After FTP Directory fix, site root appears as "/" (contains 00, wp-content, wp-*.php).
 
 on:
   workflow_dispatch:
@@ -11,26 +12,23 @@ on:
         required: false
         default: "209.74.67.142"
       remote_root:
-        description: "Site root containing 00"
+        description: "FTP path of site root (usually / after jail fix)"
         required: true
-        default: "/home/fengrmkw/buycarl.com"
+        default: "/"
       mode:
-        description: "Connection mode"
+        description: "ftps recommended"
         type: choice
-        options: [auto, ftps, ftp, sftp]
-        default: auto
+        options: [ftps, ftp, auto]
+        default: ftps
 
 jobs:
   fetch-00:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install tools
-        run: sudo apt-get update && sudo apt-get install -y lftp
-
-      - name: Mirror only 00 via lftp FTPS
+      - name: Download only 00 (exclude zip/archives)
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -45,54 +43,167 @@ jobs:
           HOST="${HOST_OVERRIDE:-}"
           [ -z "$HOST" ] && HOST="${FTP_HOST:-}"
           [ -z "$HOST" ] && HOST="${FTP_SERVER:-}"
-          PORT="${FTP_PORT:-21}"
-          test -n "$HOST" && test -n "${FTP_USERNAME:-}" && test -n "${FTP_PASSWORD:-}"
-          mkdir -p legacy-ftp/00
+          export FTP_CONNECT_HOST="$HOST"
+          test -n "$FTP_CONNECT_HOST" && test -n "${FTP_USERNAME:-}" && test -n "${FTP_PASSWORD:-}"
+          echo "Host=$FTP_CONNECT_HOST root=$REMOTE_ROOT mode=$FTP_MODE"
+          python3 <<'PY'
+          import ftplib, os, ssl, sys
+          from pathlib import Path
 
-          # Prefer absolute site root; FTP jail may map that to /
-          cat > /tmp/mirror00.lftp <<EOF
-          set net:timeout 45
-          set net:max-retries 3
-          set ftp:passive-mode true
-          set ftp:ssl-allow yes
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
-          open -p ${PORT} -u ${FTP_USERNAME},${FTP_PASSWORD} ${HOST}
-          cls -1 || true
-          cd ${REMOTE_ROOT} || cd / || true
-          pwd
-          cls -1 || true
-          mirror -c --parallel=6 \
-            --exclude-glob .git/ \
-            --exclude-glob node_modules/ \
-            --exclude-glob cache/ \
-            --exclude-glob *.log \
-            --exclude-glob *.zip \
-            --exclude-glob *.sql.gz \
-            --exclude-glob uploads/ \
-            00 legacy-ftp/00
-          bye
-          EOF
+          host = os.environ["FTP_CONNECT_HOST"].strip()
+          port = int(os.environ.get("FTP_PORT") or "21")
+          user = os.environ["FTP_USERNAME"]
+          password = os.environ["FTP_PASSWORD"]
+          root = (os.environ.get("REMOTE_ROOT") or "/").strip() or "/"
+          mode = (os.environ.get("FTP_MODE") or "ftps").lower()
+          out = Path("legacy-ftp/00")
+          out.mkdir(parents=True, exist_ok=True)
 
-          if [ "${FTP_MODE}" = "ftp" ]; then
-            sed -i 's/ssl-force yes/ssl-force no/; s/ssl-allow yes/ssl-allow no/' /tmp/mirror00.lftp
-          fi
+          SKIP_EXT = {".zip", ".gz", ".sql", ".tar", ".rar", ".7z", ".mp4", ".mov"}
+          SKIP_NAMES = {".git", "node_modules", "cache", "uploads", ".", "..", "wp-content.zip"}
 
-          lftp -f /tmp/mirror00.lftp
-          echo "## sizes"
+          def connect(kind):
+              print(f"connect {kind} {host}:{port}")
+              if kind == "ftps":
+                  ctx = ssl.create_default_context()
+                  ctx.check_hostname = False
+                  ctx.verify_mode = ssl.CERT_NONE
+                  ftp = ftplib.FTP_TLS(context=ctx, timeout=90)
+                  ftp.connect(host, port)
+                  ftp.login(user, password)
+                  ftp.set_pasv(True)
+                  try:
+                      ftp.prot_p()
+                  except Exception as e:
+                      print("prot_p", e)
+                  return ftp
+              ftp = ftplib.FTP(timeout=90)
+              ftp.connect(host, port)
+              ftp.login(user, password)
+              ftp.set_pasv(True)
+              return ftp
+
+          order = ["ftps", "ftp"] if mode == "auto" else [mode]
+          ftp = None
+          last = None
+          for kind in order:
+              try:
+                  ftp = connect(kind)
+                  break
+              except Exception as e:
+                  last = e
+                  print(f"FAIL {kind}: {e}")
+          if not ftp:
+              raise SystemExit(f"connect failed: {last}")
+
+          print("welcome", (ftp.welcome or "")[:120])
+          # Prefer / (FTP jail). Absolute /home/... usually 550 from additional FTP users.
+          for cand in [root, "/", "."]:
+              try:
+                  ftp.cwd(cand)
+                  print("cwd", cand, "->", ftp.pwd())
+                  break
+              except Exception as e:
+                  print("cwd miss", cand, e)
+          else:
+              raise SystemExit("cannot cwd site root")
+
+          names = []
+          try:
+              names = ftp.nlst()
+          except Exception as e:
+              print("nlst failed", e)
+          print("root entries sample:", names[:40])
+          if not any(n.rstrip("/").endswith("00") or n == "00" for n in names):
+              # try cwd 00 anyway
+              pass
+
+          def is_dir(name):
+              cur = ftp.pwd()
+              try:
+                  ftp.cwd(name)
+                  ftp.cwd(cur)
+                  return True
+              except Exception:
+                  return False
+
+          stats = {"files": 0, "bytes": 0}
+
+          def mirror(remote_rel: str, local: Path, depth=0):
+              local.mkdir(parents=True, exist_ok=True)
+              cur = ftp.pwd()
+              ftp.cwd(remote_rel)
+              here = ftp.pwd()
+              entries = []
+              try:
+                  entries = ftp.nlst()
+              except Exception as e:
+                  print("nlst fail", here, e)
+                  ftp.cwd(cur)
+                  return
+              for raw in entries:
+                  name = raw.split("/")[-1]
+                  if name in SKIP_NAMES:
+                      continue
+                  lower = name.lower()
+                  if any(lower.endswith(ext) for ext in SKIP_EXT):
+                      print(f"{'  '*depth}SKIP {name}")
+                      continue
+                  if is_dir(name):
+                      print(f"{'  '*depth}DIR {name}")
+                      mirror(name, local / name, depth + 1)
+                      ftp.cwd(here)
+                  else:
+                      dest = local / name
+                      print(f"{'  '*depth}GET {name}")
+                      with open(dest, "wb") as f:
+                          ftp.retrbinary(f"RETR {name}", f.write)
+                      stats["files"] += 1
+                      stats["bytes"] += dest.stat().st_size
+              ftp.cwd(cur)
+
+          # Enter 00 from site root
+          try:
+              ftp.cwd("00")
+          except Exception as e:
+              raise SystemExit(f"cannot cwd into 00 from {ftp.pwd()}: {e}")
+          print("in 00, PWD", ftp.pwd())
+          # mirror current dir into out
+          ftp.cwd("..")
+          mirror("00", out)
+
+          try:
+              ftp.quit()
+          except Exception:
+              pass
+
+          print(f"DONE files={stats['files']} bytes={stats['bytes']}")
+          if stats["files"] < 5:
+              raise SystemExit("too few files")
+          PY
+
           du -sh legacy-ftp/00
           find legacy-ftp/00 -type f | wc -l
-          test "$(find legacy-ftp/00 -type f | wc -l)" -gt 5
+          # sanity: should not contain huge zips
+          find legacy-ftp/00 -iname '*.zip' -o -iname 'wp-content.zip' | head || true
 
       - name: Pack + upload
         run: |
           tar -czf legacy-00.tgz -C legacy-ftp .
           ls -lh legacy-00.tgz
-          test "$(du -k legacy-00.tgz | awk '{print $1}')" -gt 50
+          # expect tens of MB, not multi-GB
+          BYTES=$(stat -c%s legacy-00.tgz)
+          test "$BYTES" -gt 50000
+          test "$BYTES" -lt 800000000
 
       - uses: actions/upload-artifact@v4
         with:
           name: legacy-00
           path: legacy-00.tgz
           retention-days: 7
+
+      - name: Summary
+        run: |
+          echo "### legacy-00 ready" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh legacy-00.tgz >> "$GITHUB_STEP_SUMMARY"
+          echo "Reply to agent: **FTP 00 done**" >> "$GITHUB_STEP_SUMMARY"
