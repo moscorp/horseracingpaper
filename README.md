@@ -11,5 +11,10 @@ Hosting: Namecheap `/home/fengrmkw/buycarl.com`. Deploy: GitHub Actions → FTP/
 
 ## Status
 
-**Waiting on legacy files** from `D:\codz\workspace\buycarl.com\`  
-(`wp-content.zip`, `fengrmkw_moosay.sql`, `/00` zip) — not visible to this Cloud Agent until uploaded or pushed.
+**Do not upload `wp-content.zip` (6.9G).** See [docs/LEGACY_TRANSFER.md](./docs/LEGACY_TRANSFER.md).
+
+Next for you:
+1. Attach only `fengrmkw_moosay.sql` (113KB) in chat  
+2. Confirm GitHub secrets include `FTP_USERNAME` (not only `FTP`)  
+3. Run Actions → **Fetch legacy from FTP**  
+4. Add Cursor FTP secrets if prompted (agent cannot read GitHub secret values)
