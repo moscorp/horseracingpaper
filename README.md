@@ -12,6 +12,6 @@ Chinese-first racing site for **buycarl.com** (WordPress CMS shell, no store).
 
 ## Status
 
-FTP legacy fetch may still be running. Scaffold + DB map land first; wire `/00` after artifact arrives.
+Legacy `/00` imported (slim source in `legacy/00-slim/`, ~387 PHP files). Full FTP extract kept local-only (gitignored).
 
 Deploy target: Namecheap `/home/fengrmkw/buycarl.com` via GitHub Actions FTP (secrets already configured).
