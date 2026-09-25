@@ -1,0 +1,122 @@
+name: Fetch legacy from FTP
+
+# Pull only /00 + wp-content themes/plugins from Namecheap FTP.
+# Do NOT use this to upload 6.9GB local zips.
+
+on:
+  workflow_dispatch:
+    inputs:
+      remote_root:
+        description: "Remote site root as FTP sees it (try / or /buycarl.com)"
+        required: true
+        default: "/"
+      include_plugins:
+        description: "Also download wp-content/plugins (larger)"
+        type: boolean
+        default: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Download slim legacy tree
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          REMOTE_ROOT: ${{ inputs.remote_root }}
+          INCLUDE_PLUGINS: ${{ inputs.include_plugins }}
+        run: |
+          set -euo pipefail
+          test -n "${FTP_SERVER:-}" || { echo "Missing FTP_SERVER secret"; exit 1; }
+          test -n "${FTP_USERNAME:-}" || { echo "Missing FTP_USERNAME secret"; exit 1; }
+          test -n "${FTP_PASSWORD:-}" || { echo "Missing FTP_PASSWORD secret"; exit 1; }
+          PORT="${FTP_PORT:-21}"
+
+          mkdir -p legacy-ftp/00 legacy-ftp/wp-content/themes legacy-ftp/wp-content/plugins
+
+          # Mirror helpers: exclude uploads/cache junk; continue on missing paths
+          cat > /tmp/lftp.rc <<EOF
+          set ftp:ssl-allow true
+          set ftp:ssl-protect-data true
+          set ftp:ssl-force false
+          set ssl:verify-certificate no
+          set net:timeout 30
+          set net:max-retries 3
+          set mirror:parallel-transfer-count 4
+          open -p ${PORT} -u ${FTP_USERNAME},${FTP_PASSWORD} ${FTP_SERVER}
+          cd ${REMOTE_ROOT}
+          pwd
+          ls
+          mirror --verbose --continue --parallel=4 \
+            --exclude-glob .git/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob cache/ \
+            --exclude-glob *.log \
+            00 legacy-ftp/00 || echo "WARN: /00 mirror failed or missing"
+          mirror --verbose --continue --parallel=4 \
+            --exclude-glob .git/ \
+            --exclude-glob node_modules/ \
+            wp-content/themes legacy-ftp/wp-content/themes || echo "WARN: themes mirror failed"
+          EOF
+
+          if [ "${INCLUDE_PLUGINS}" = "true" ]; then
+            cat >> /tmp/lftp.rc <<EOF
+          mirror --verbose --continue --parallel=4 \
+            --exclude-glob .git/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob cache/ \
+            wp-content/plugins legacy-ftp/wp-content/plugins || echo "WARN: plugins mirror failed"
+          EOF
+          fi
+
+          echo "bye" >> /tmp/lftp.rc
+          lftp -f /tmp/lftp.rc
+
+          echo "## Sizes"
+          du -sh legacy-ftp legacy-ftp/* legacy-ftp/wp-content/* 2>/dev/null || true
+          find legacy-ftp -maxdepth 3 -type d | head -80
+
+      - name: Pack artifact
+        run: |
+          set -euo pipefail
+          # Cap: if plugins tree is huge, keep only likely custom / racing-related dirs
+          if [ -d legacy-ftp/wp-content/plugins ]; then
+            SIZE_MB=$(du -sm legacy-ftp/wp-content/plugins | awk '{print $1}')
+            echo "plugins size: ${SIZE_MB}MB"
+            if [ "$SIZE_MB" -gt 400 ]; then
+              echo "Plugins tree large — keeping name matches only"
+              mkdir -p /tmp/plugins-keep
+              find legacy-ftp/wp-content/plugins -mindepth 1 -maxdepth 1 -type d \
+                \( -iname '*race*' -o -iname '*hkjc*' -o -iname '*horse*' -o -iname '*m6*' -o -iname '*mark*' -o -iname '*yoast*' -o -iname '*buycarl*' -o -iname '*carl*' -o -iname '*custom*' \) \
+                -exec cp -a {} /tmp/plugins-keep/ \;
+              rm -rf legacy-ftp/wp-content/plugins
+              mkdir -p legacy-ftp/wp-content/plugins
+              cp -a /tmp/plugins-keep/. legacy-ftp/wp-content/plugins/ || true
+            fi
+          fi
+          tar -czf legacy-ftp.tgz -C legacy-ftp .
+          ls -lh legacy-ftp.tgz
+          # Fail early if empty
+          test "$(du -k legacy-ftp.tgz | awk '{print $1}')" -gt 10
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-ftp
+          path: legacy-ftp.tgz
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Summary
+        run: |
+          echo "Download artifact **legacy-ftp** from this run, or tell the Cloud Agent the run finished." >> "$GITHUB_STEP_SUMMARY"
+          ls -lh legacy-ftp.tgz >> "$GITHUB_STEP_SUMMARY"
