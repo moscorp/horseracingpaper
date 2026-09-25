@@ -1,0 +1,98 @@
+name: Fetch legacy 00 only
+
+# Fast path: mirror only /home/.../buycarl.com/00 (no themes/plugins).
+# Use when full fetch is too slow or times out.
+
+on:
+  workflow_dispatch:
+    inputs:
+      host_override:
+        description: "FTP host (Origin IP)"
+        required: false
+        default: "209.74.67.142"
+      remote_root:
+        description: "Site root containing 00"
+        required: true
+        default: "/home/fengrmkw/buycarl.com"
+      mode:
+        description: "Connection mode"
+        type: choice
+        options: [auto, ftps, ftp, sftp]
+        default: auto
+
+jobs:
+  fetch-00:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Mirror only 00 via lftp FTPS
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          HOST_OVERRIDE: ${{ inputs.host_override }}
+          REMOTE_ROOT: ${{ inputs.remote_root }}
+          FTP_MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+          HOST="${HOST_OVERRIDE:-}"
+          [ -z "$HOST" ] && HOST="${FTP_HOST:-}"
+          [ -z "$HOST" ] && HOST="${FTP_SERVER:-}"
+          PORT="${FTP_PORT:-21}"
+          test -n "$HOST" && test -n "${FTP_USERNAME:-}" && test -n "${FTP_PASSWORD:-}"
+          mkdir -p legacy-ftp/00
+
+          # Prefer absolute site root; FTP jail may map that to /
+          cat > /tmp/mirror00.lftp <<EOF
+          set net:timeout 45
+          set net:max-retries 3
+          set ftp:passive-mode true
+          set ftp:ssl-allow yes
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          open -p ${PORT} -u ${FTP_USERNAME},${FTP_PASSWORD} ${HOST}
+          cls -1 || true
+          cd ${REMOTE_ROOT} || cd / || true
+          pwd
+          cls -1 || true
+          mirror -c --parallel=6 \
+            --exclude-glob .git/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob cache/ \
+            --exclude-glob *.log \
+            --exclude-glob *.zip \
+            --exclude-glob *.sql.gz \
+            --exclude-glob uploads/ \
+            00 legacy-ftp/00
+          bye
+          EOF
+
+          if [ "${FTP_MODE}" = "ftp" ]; then
+            sed -i 's/ssl-force yes/ssl-force no/; s/ssl-allow yes/ssl-allow no/' /tmp/mirror00.lftp
+          fi
+
+          lftp -f /tmp/mirror00.lftp
+          echo "## sizes"
+          du -sh legacy-ftp/00
+          find legacy-ftp/00 -type f | wc -l
+          test "$(find legacy-ftp/00 -type f | wc -l)" -gt 5
+
+      - name: Pack + upload
+        run: |
+          tar -czf legacy-00.tgz -C legacy-ftp .
+          ls -lh legacy-00.tgz
+          test "$(du -k legacy-00.tgz | awk '{print $1}')" -gt 50
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-00
+          path: legacy-00.tgz
+          retention-days: 7
