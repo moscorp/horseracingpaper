@@ -209,15 +209,15 @@ jobs:
                       print(f"{'  '*depth}GET {remote}")
                       with open(local_path, "wb") as f:
                           ftp.retrbinary(f"RETR {remote}", f.write)
-                      downloaded_files += 1
+                      stats["files"] += 1
 
           for folder, dest in targets:
               print(f"== Mirroring {folder} -> {dest} ==")
               mirror(folder, dest)
 
           ftp.quit()
-          print(f"Downloaded files: {downloaded_files}")
-          if downloaded_files < 5:
+          print(f"Downloaded files: {stats['files']}")
+          if stats["files"] < 5:
               raise SystemExit("Too few files downloaded — connection or path wrong.")
           PY
 
