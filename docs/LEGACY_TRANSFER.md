@@ -19,9 +19,16 @@ Repo → Settings → Secrets and variables → Actions:
 | `FTP_PORT` | `21` |
 | `FTP_USERNAME` | `buycarlftp@buycarl.com` |
 | `FTP_PASSWORD` | *(your password)* |
-| `FTP_SERVER_DIR` | site root as seen by FTP (often `/` or `/buycarl.com` or `/home/fengrmkw/buycarl.com`) |
 
 If you created a secret literally named `FTP`, rename or add **`FTP_USERNAME`** — workflows expect `FTP_USERNAME`.
+
+### If a run fails with `max-retries` / empty download
+
+1. Open FileZilla with the same host/user/pass and note the **folder that contains both `00` and `wp-content`**.
+2. Re-run the workflow with that path as `remote_root` (often `/` or `public_html`).
+3. Prefer mode **`ftps`** (Namecheap “explicit FTPS” on port 21).
+4. **Rotate FTP password** if an old run log showed part of it (special characters can leak via URL-style FTP clients). Update the `FTP_PASSWORD` secret after rotating.
+5. In Namecheap/cPanel → FTP Accounts, confirm remote FTP is allowed (not IP-restricted to your home only).
 
 Optional for this Cloud Agent (so it can FTP without waiting on Actions): add the same `FTP_PASSWORD` / `FTP_USERNAME` as **Cursor environment secrets** when prompted.
 
