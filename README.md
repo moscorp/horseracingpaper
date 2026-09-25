@@ -1,22 +1,15 @@
-# horseracingpaper / BuyCarl
+# horseracingpaper / Horse Racing Paper
 
-Rewrite workspace for **buycarl.com** (Namecheap shared hosting + WordPress + `/00` racing tooling).
+Rewrite of **buycarl.com** → Chinese racing site **Horse racing paper**（賽馬報紙）.  
+Hosting: Namecheap `/home/fengrmkw/buycarl.com`. Deploy: GitHub Actions → FTP/SFTP.
 
-## Start here
+## Docs
 
-1. Read [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) — credentials, source, DB, deploy
-2. Read [CRON_INVENTORY.md](./CRON_INVENTORY.md) — cron-job.org vs hosting recommendation
+1. [ARCHITECTURE.md](./ARCHITECTURE.md) — locked product decisions + WP-shell recommendation  
+2. [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) — what to upload next  
+3. [CRON_INVENTORY.md](./CRON_INVENTORY.md) — cron-job.org vs hosting
 
-## Current status
+## Status
 
-- GitHub repo initialized
-- Live site surveyed (WordPress / PHP 7.4 / LiteSpeed / Cloudflare)
-- Local legacy path `D:\codz\workspace\buycarl.com\00` **not yet uploaded**
-- Implementation blocked on Priority 1 items in the setup checklist
-
-## Target stack (planned)
-
-- WordPress store kept (unless you choose full rewrite)
-- Custom racing plugin + dense Tailwind/JS frontend
-- Backend admin: settings/constants + cron registry
-- GitHub Actions → Namecheap FTP/SFTP on every `main` update
+**Waiting on legacy files** from `D:\codz\workspace\buycarl.com\`  
+(`wp-content.zip`, `fengrmkw_moosay.sql`, `/00` zip) — not visible to this Cloud Agent until uploaded or pushed.
