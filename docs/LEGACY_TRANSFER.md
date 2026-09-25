@@ -15,10 +15,13 @@ Repo → Settings → Secrets and variables → Actions:
 
 | Secret name | Value |
 |-------------|--------|
-| `FTP_SERVER` | `ftp.fengins.com` |
+| `FTP_HOST` (preferred) | `209.74.67.142` — **use the server IP, not `ftp.fengins.com`** |
+| `FTP_SERVER` (fallback) | same IP if you already created this name |
 | `FTP_PORT` | `21` |
 | `FTP_USERNAME` | `buycarlftp@buycarl.com` |
 | `FTP_PASSWORD` | *(your password)* |
+
+Why IP: `ftp.fengins.com` currently resolves to **Cloudflare**, which does not terminate your Namecheap Pure-FTPd. Port 21 on `209.74.67.142` is open (FTPS-capable). SSH-style access is on **21098** if needed later.
 
 If you created a secret literally named `FTP`, rename or add **`FTP_USERNAME`** — workflows expect `FTP_USERNAME`.
 

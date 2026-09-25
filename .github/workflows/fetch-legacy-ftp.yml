@@ -22,6 +22,10 @@ on:
           - ftp
           - auto
         default: auto
+      host_override:
+        description: "FTP host override (prefer server IP; leave empty to use secrets)"
+        required: false
+        default: "209.74.67.142"
 
 jobs:
   fetch:
@@ -33,23 +37,31 @@ jobs:
 
       - name: Probe + download via Python (safe password / FTPS)
         env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          HOST_OVERRIDE: ${{ inputs.host_override }}
           REMOTE_ROOT: ${{ inputs.remote_root }}
           INCLUDE_PLUGINS: ${{ inputs.include_plugins }}
           FTP_MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
-          test -n "${FTP_SERVER:-}" || { echo "Missing FTP_SERVER"; exit 1; }
+          # Prefer: Run-workflow host_override > FTP_HOST secret > FTP_SERVER secret
+          HOST="${HOST_OVERRIDE:-}"
+          if [ -z "$HOST" ]; then HOST="${FTP_HOST:-}"; fi
+          if [ -z "$HOST" ]; then HOST="${FTP_SERVER:-}"; fi
+          export FTP_CONNECT_HOST="$HOST"
+          test -n "${FTP_CONNECT_HOST:-}" || { echo "Missing host: set host_override, or secret FTP_HOST / FTP_SERVER"; exit 1; }
           test -n "${FTP_USERNAME:-}" || { echo "Missing FTP_USERNAME — add secret FTP_USERNAME=buycarlftp@buycarl.com"; exit 1; }
           test -n "${FTP_PASSWORD:-}" || { echo "Missing FTP_PASSWORD"; exit 1; }
+          echo "Using FTP host: ${FTP_CONNECT_HOST} (do not use Cloudflare-proxied ftp.fengins.com)"
           python3 - <<'PY'
           import ftplib, os, ssl, sys, time
           from pathlib import Path
 
-          host = os.environ["FTP_SERVER"].strip()
+          host = (os.environ.get("FTP_CONNECT_HOST") or "").strip()
           port = int(os.environ.get("FTP_PORT") or "21")
           user = os.environ["FTP_USERNAME"]
           password = os.environ["FTP_PASSWORD"]
@@ -58,6 +70,11 @@ jobs:
           include_plugins = (os.environ.get("INCLUDE_PLUGINS") or "true").lower() == "true"
           out = Path("legacy-ftp")
           out.mkdir(parents=True, exist_ok=True)
+          if not host:
+              raise SystemExit("FTP host empty")
+          # Guard: Cloudflare DNS for ftp.fengins.com breaks FTP
+          if "fengins.com" in host.lower() and not host.replace(".", "").isdigit():
+              print("WARNING: hostname looks Cloudflare-proxied; prefer IP 209.74.67.142")
 
           def connect(kind: str):
               print(f"== Connecting {kind} {host}:{port} as {user!r} ==")
