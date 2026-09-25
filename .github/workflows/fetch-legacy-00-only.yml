@@ -1,8 +1,8 @@
 name: Fetch legacy 00 only
 
-# Fast path: download ONLY the /00 folder from FTP jail root.
-# Do NOT download wp-content.zip or full WordPress tree.
-# After FTP Directory fix, site root appears as "/" (contains 00, wp-content, wp-*.php).
+# Download 00.zip from FTP jail root (one file), then unzip.
+# Avoids thousands of FTPS transfers that drop with SSLEOFError.
+# Fallback: resume file-by-file mirror of /00 with reconnect.
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ on:
         required: false
         default: "209.74.67.142"
       remote_root:
-        description: "FTP path of site root (usually / after jail fix)"
+        description: "FTP site root (usually /)"
         required: true
         default: "/"
       mode:
@@ -20,6 +20,11 @@ on:
         type: choice
         options: [ftps, ftp, auto]
         default: ftps
+      strategy:
+        description: "Prefer 00.zip single download"
+        type: choice
+        options: [zip_then_mirror, zip_only, mirror_only]
+        default: zip_then_mirror
 
 jobs:
   fetch-00:
@@ -28,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Download only 00 (exclude zip/archives)
+      - name: Download 00.zip or mirror /00
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -38,6 +43,7 @@ jobs:
           HOST_OVERRIDE: ${{ inputs.host_override }}
           REMOTE_ROOT: ${{ inputs.remote_root }}
           FTP_MODE: ${{ inputs.mode }}
+          STRATEGY: ${{ inputs.strategy }}
         run: |
           set -euo pipefail
           HOST="${HOST_OVERRIDE:-}"
@@ -45,9 +51,10 @@ jobs:
           [ -z "$HOST" ] && HOST="${FTP_SERVER:-}"
           export FTP_CONNECT_HOST="$HOST"
           test -n "$FTP_CONNECT_HOST" && test -n "${FTP_USERNAME:-}" && test -n "${FTP_PASSWORD:-}"
-          echo "Host=$FTP_CONNECT_HOST root=$REMOTE_ROOT mode=$FTP_MODE"
-          python3 <<'PY'
-          import ftplib, os, ssl, sys
+          echo "Host=$FTP_CONNECT_HOST root=$REMOTE_ROOT mode=$FTP_MODE strategy=$STRATEGY"
+          mkdir -p legacy-ftp
+          python3 -u <<'PY'
+          import ftplib, os, ssl, sys, time, zipfile
           from pathlib import Path
 
           host = os.environ["FTP_CONNECT_HOST"].strip()
@@ -56,69 +63,100 @@ jobs:
           password = os.environ["FTP_PASSWORD"]
           root = (os.environ.get("REMOTE_ROOT") or "/").strip() or "/"
           mode = (os.environ.get("FTP_MODE") or "ftps").lower()
-          out = Path("legacy-ftp/00")
-          out.mkdir(parents=True, exist_ok=True)
+          strategy = (os.environ.get("STRATEGY") or "zip_then_mirror").lower()
+          out = Path("legacy-ftp")
+          out.mkdir(exist_ok=True)
 
-          SKIP_EXT = {".zip", ".gz", ".sql", ".tar", ".rar", ".7z", ".mp4", ".mov"}
-          SKIP_NAMES = {".git", "node_modules", "cache", "uploads", ".", "..", "wp-content.zip"}
+          SKIP_EXT = {".zip", ".gz", ".tar", ".rar", ".7z", ".mp4", ".mov", ".otf", ".ttf", ".woff", ".woff2", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
+          SKIP_DIR = {"font", "fonts", "node_modules", "cache", "uploads", ".git", "vendor/bin"}
 
-          def connect(kind):
-              print(f"connect {kind} {host}:{port}")
-              if kind == "ftps":
-                  ctx = ssl.create_default_context()
-                  ctx.check_hostname = False
-                  ctx.verify_mode = ssl.CERT_NONE
-                  ftp = ftplib.FTP_TLS(context=ctx, timeout=90)
-                  ftp.connect(host, port)
-                  ftp.login(user, password)
-                  ftp.set_pasv(True)
+          def connect(kind="ftps"):
+              if kind == "ftps" or (kind == "auto"):
                   try:
-                      ftp.prot_p()
+                      ctx = ssl.create_default_context()
+                      ctx.check_hostname = False
+                      ctx.verify_mode = ssl.CERT_NONE
+                      ftp = ftplib.FTP_TLS(context=ctx, timeout=120)
+                      ftp.connect(host, port)
+                      ftp.login(user, password)
+                      ftp.set_pasv(True)
+                      try:
+                          ftp.prot_p()
+                      except Exception as e:
+                          print("prot_p", e, flush=True)
+                      print(f"connected ftps {host}:{port}", flush=True)
+                      return ftp, "ftps"
                   except Exception as e:
-                      print("prot_p", e)
-                  return ftp
-              ftp = ftplib.FTP(timeout=90)
+                      print(f"ftps fail: {e}", flush=True)
+                      if kind == "ftps":
+                          raise
+              ftp = ftplib.FTP(timeout=120)
               ftp.connect(host, port)
               ftp.login(user, password)
               ftp.set_pasv(True)
-              return ftp
+              print(f"connected ftp {host}:{port}", flush=True)
+              return ftp, "ftp"
 
-          order = ["ftps", "ftp"] if mode == "auto" else [mode]
-          ftp = None
-          last = None
-          for kind in order:
-              try:
-                  ftp = connect(kind)
-                  break
-              except Exception as e:
-                  last = e
-                  print(f"FAIL {kind}: {e}")
-          if not ftp:
-              raise SystemExit(f"connect failed: {last}")
-
-          print("welcome", (ftp.welcome or "")[:120])
-          # Prefer / (FTP jail). Absolute /home/... usually 550 from additional FTP users.
-          for cand in [root, "/", "."]:
-              try:
-                  ftp.cwd(cand)
-                  print("cwd", cand, "->", ftp.pwd())
-                  break
-              except Exception as e:
-                  print("cwd miss", cand, e)
-          else:
+          def ensure_root(ftp):
+              for cand in [root, "/", "."]:
+                  try:
+                      ftp.cwd(cand)
+                      print(f"cwd {cand} -> {ftp.pwd()}", flush=True)
+                      return
+                  except Exception as e:
+                      print(f"cwd miss {cand}: {e}", flush=True)
               raise SystemExit("cannot cwd site root")
 
-          names = []
-          try:
-              names = ftp.nlst()
-          except Exception as e:
-              print("nlst failed", e)
-          print("root entries sample:", names[:40])
-          if not any(n.rstrip("/").endswith("00") or n == "00" for n in names):
-              # try cwd 00 anyway
-              pass
+          def nlst(ftp):
+              try:
+                  return ftp.nlst()
+              except Exception as e:
+                  print(f"nlst fail: {e}", flush=True)
+                  return []
 
-          def is_dir(name):
+          def download_zip(ftp) -> Path | None:
+              names = [n.split("/")[-1] for n in nlst(ftp)]
+              print("root sample:", names[:50], flush=True)
+              candidates = [n for n in names if n.lower() in ("00.zip", "00.tar.gz", "00.tgz")]
+              if not candidates:
+                  # case variants
+                  candidates = [n for n in names if n.lower().startswith("00.") and n.lower().endswith((".zip", ".tgz", ".gz"))]
+              if not candidates:
+                  print("no 00.zip at root", flush=True)
+                  return None
+              name = candidates[0]
+              dest = out / name
+              print(f"RETR {name} -> {dest}", flush=True)
+              with open(dest, "wb") as f:
+                  ftp.retrbinary(f"RETR {name}", f.write)
+              size = dest.stat().st_size
+              print(f"downloaded {name} bytes={size}", flush=True)
+              if size < 1000:
+                  raise SystemExit("00 archive too small")
+              return dest
+
+          def extract_zip(zpath: Path) -> int:
+              dest = out / "00"
+              dest.mkdir(parents=True, exist_ok=True)
+              if zpath.suffix.lower() == ".zip":
+                  with zipfile.ZipFile(zpath, "r") as zf:
+                      # If zip already contains top-level 00/, extract as-is into legacy-ftp
+                      names = zf.namelist()
+                      print(f"zip entries={len(names)} sample={names[:10]}", flush=True)
+                      has_00_prefix = any(n.replace("\\", "/").startswith("00/") for n in names)
+                      if has_00_prefix:
+                          zf.extractall(out)
+                      else:
+                          zf.extractall(dest)
+              else:
+                  import tarfile
+                  with tarfile.open(zpath, "r:*") as tf:
+                      tf.extractall(out / "00")
+              files = sum(1 for p in (out / "00").rglob("*") if p.is_file())
+              print(f"extracted files under legacy-ftp/00: {files}", flush=True)
+              return files
+
+          def is_dir(ftp, name):
               cur = ftp.pwd()
               try:
                   ftp.cwd(name)
@@ -127,74 +165,147 @@ jobs:
               except Exception:
                   return False
 
-          stats = {"files": 0, "bytes": 0}
-
-          def mirror(remote_rel: str, local: Path, depth=0):
+          def mirror(ftp, kind, remote_rel, local: Path, depth=0, stats=None):
+              if stats is None:
+                  stats = {"files": 0, "errors": 0}
               local.mkdir(parents=True, exist_ok=True)
+              # reconnect helper
+              def reconnect():
+                  nonlocal ftp, kind
+                  try:
+                      ftp.quit()
+                  except Exception:
+                      try:
+                          ftp.close()
+                      except Exception:
+                          pass
+                  time.sleep(2)
+                  ftp, kind = connect(mode if mode != "auto" else kind)
+                  ensure_root(ftp)
+                  # walk back into remote_rel from root using absolute from site
+                  # caller keeps path stack via remote_rel relative to site /00
+                  return ftp
+
               cur = ftp.pwd()
-              ftp.cwd(remote_rel)
-              here = ftp.pwd()
-              entries = []
               try:
-                  entries = ftp.nlst()
+                  ftp.cwd(remote_rel)
               except Exception as e:
-                  print("nlst fail", here, e)
-                  ftp.cwd(cur)
-                  return
+                  print(f"cwd {remote_rel} fail: {e}", flush=True)
+                  return stats
+              here = ftp.pwd()
+              entries = nlst(ftp)
               for raw in entries:
                   name = raw.split("/")[-1]
-                  if name in SKIP_NAMES:
+                  if name in (".", ".."):
                       continue
                   lower = name.lower()
-                  if any(lower.endswith(ext) for ext in SKIP_EXT):
-                      print(f"{'  '*depth}SKIP {name}")
+                  if name.lower() in SKIP_DIR or lower in SKIP_DIR:
+                      print(f"{'  '*depth}SKIPDIR {name}", flush=True)
                       continue
-                  if is_dir(name):
-                      print(f"{'  '*depth}DIR {name}")
-                      mirror(name, local / name, depth + 1)
-                      ftp.cwd(here)
+                  if any(lower.endswith(ext) for ext in SKIP_EXT):
+                      print(f"{'  '*depth}SKIP {name}", flush=True)
+                      continue
+                  try:
+                      directory = is_dir(ftp, name)
+                  except Exception:
+                      directory = False
+                  if directory:
+                      print(f"{'  '*depth}DIR {name}", flush=True)
+                      mirror(ftp, kind, name, local / name, depth + 1, stats)
+                      try:
+                          ftp.cwd(here)
+                      except Exception:
+                          ftp = reconnect()
+                          # best-effort: go to /00 then relative — simplified: cwd / then 00 then path
+                          ensure_root(ftp)
+                          ftp.cwd("00")
+                          if depth > 0:
+                              pass
+                          ftp.cwd(here) if False else None
                   else:
                       dest = local / name
-                      print(f"{'  '*depth}GET {name}")
-                      with open(dest, "wb") as f:
-                          ftp.retrbinary(f"RETR {name}", f.write)
-                      stats["files"] += 1
-                      stats["bytes"] += dest.stat().st_size
-              ftp.cwd(cur)
+                      for attempt in range(1, 4):
+                          try:
+                              print(f"{'  '*depth}GET {name} (try {attempt})", flush=True)
+                              with open(dest, "wb") as f:
+                                  ftp.retrbinary(f"RETR {name}", f.write)
+                              stats["files"] += 1
+                              break
+                          except Exception as e:
+                              print(f"{'  '*depth}ERR {name}: {e}", flush=True)
+                              stats["errors"] += 1
+                              try:
+                                  ftp, kind = connect(mode if mode != "auto" else kind)
+                                  ensure_root(ftp)
+                                  ftp.cwd("00")
+                                  # navigate to here by parts from /00
+                                  rel = str(local.relative_to(out / "00")) if local != (out / "00") else ""
+                                  if rel and rel != ".":
+                                      for part in Path(rel).parts:
+                                          ftp.cwd(part)
+                              except Exception as e2:
+                                  print(f"reconnect nav fail: {e2}", flush=True)
+                              time.sleep(1)
+                      else:
+                          print(f"{'  '*depth}GIVEUP {name}", flush=True)
+              try:
+                  ftp.cwd(cur)
+              except Exception:
+                  pass
+              return stats
 
-          # Enter 00 from site root
-          try:
-              ftp.cwd("00")
-          except Exception as e:
-              raise SystemExit(f"cannot cwd into 00 from {ftp.pwd()}: {e}")
-          print("in 00, PWD", ftp.pwd())
-          # mirror current dir into out
-          ftp.cwd("..")
-          mirror("00", out)
+          ftp, kind = connect(mode)
+          ensure_root(ftp)
+
+          files = 0
+          if strategy in ("zip_then_mirror", "zip_only"):
+              z = download_zip(ftp)
+              if z:
+                  files = extract_zip(z)
+              elif strategy == "zip_only":
+                  raise SystemExit("00.zip not found")
+
+          if files < 5 and strategy in ("zip_then_mirror", "mirror_only"):
+              print("falling back to file mirror of /00", flush=True)
+              try:
+                  ftp.cwd("/")
+              except Exception:
+                  pass
+              ensure_root(ftp)
+              # fresh connection for mirror
+              try:
+                  ftp.quit()
+              except Exception:
+                  pass
+              ftp, kind = connect(mode)
+              ensure_root(ftp)
+              stats = mirror(ftp, kind, "00", out / "00")
+              files = stats["files"]
+              print(f"mirror done files={files} errors={stats['errors']}", flush=True)
 
           try:
               ftp.quit()
           except Exception:
               pass
 
-          print(f"DONE files={stats['files']} bytes={stats['bytes']}")
-          if stats["files"] < 5:
-              raise SystemExit("too few files")
+          if files < 5:
+              raise SystemExit(f"too few files ({files})")
+          print(f"SUCCESS files={files}", flush=True)
           PY
 
-          du -sh legacy-ftp/00
-          find legacy-ftp/00 -type f | wc -l
-          # sanity: should not contain huge zips
-          find legacy-ftp/00 -iname '*.zip' -o -iname 'wp-content.zip' | head || true
+          du -sh legacy-ftp/00 || du -sh legacy-ftp/*
+          find legacy-ftp/00 -type f 2>/dev/null | wc -l
 
       - name: Pack + upload
         run: |
+          set -euo pipefail
+          # Prefer extracted 00 tree; keep zip too if present
           tar -czf legacy-00.tgz -C legacy-ftp .
           ls -lh legacy-00.tgz
-          # expect tens of MB, not multi-GB
           BYTES=$(stat -c%s legacy-00.tgz)
+          echo "artifact_bytes=$BYTES"
           test "$BYTES" -gt 50000
-          test "$BYTES" -lt 800000000
+          test "$BYTES" -lt 900000000
 
       - uses: actions/upload-artifact@v4
         with:
@@ -206,4 +317,4 @@ jobs:
         run: |
           echo "### legacy-00 ready" >> "$GITHUB_STEP_SUMMARY"
           ls -lh legacy-00.tgz >> "$GITHUB_STEP_SUMMARY"
-          echo "Reply to agent: **FTP 00 done**" >> "$GITHUB_STEP_SUMMARY"
+          echo "Reply: **FTP 00 done**" >> "$GITHUB_STEP_SUMMARY"
