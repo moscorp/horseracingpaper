@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       remote_root:
-        description: "Start path ( / is OK; script will also probe common folders )"
+        description: "Site root containing 00 and wp-content"
         required: true
-        default: "/"
+        default: "/home/fengrmkw/buycarl.com"
       include_plugins:
         description: "Also download wp-content/plugins"
         type: boolean
@@ -78,13 +78,14 @@ jobs:
 
           CANDIDATE_ROOTS = [
               root,
+              "/home/fengrmkw/buycarl.com",
+              "home/fengrmkw/buycarl.com",
+              "/home/fengrmkw/buycarl.com/",
               "/",
               "public_html",
               "/public_html",
               "buycarl.com",
               "/buycarl.com",
-              "home/fengrmkw/buycarl.com",
-              "/home/fengrmkw/buycarl.com",
               "domains/buycarl.com/public_html",
               "/domains/buycarl.com/public_html",
           ]
