@@ -1,13 +1,13 @@
 name: Fetch legacy from FTP
 
-# Pull only /00 + wp-content themes/plugins from Namecheap FTP.
-# Do NOT upload 6.9GB local zips.
+# Pull /00 + wp-content themes/plugins from Namecheap.
+# Prefer origin IP 209.74.67.142 (ftp.fengins.com is Cloudflare).
 
 on:
   workflow_dispatch:
     inputs:
       remote_root:
-        description: "Remote path after login (try / then public_html then buycarl.com)"
+        description: "Start path ( / is OK; script will also probe common folders )"
         required: true
         default: "/"
       include_plugins:
@@ -18,24 +18,28 @@ on:
         description: "Connection mode"
         type: choice
         options:
+          - auto
           - ftps
           - ftp
-          - auto
+          - sftp
         default: auto
       host_override:
-        description: "FTP host override (prefer server IP; leave empty to use secrets)"
+        description: "FTP/SFTP host (use Origin IP)"
         required: false
         default: "209.74.67.142"
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Probe + download via Python (safe password / FTPS)
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y lftp openssh-client
+
+      - name: Download legacy tree
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -48,182 +52,377 @@ jobs:
           FTP_MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
-          # Prefer: Run-workflow host_override > FTP_HOST secret > FTP_SERVER secret
           HOST="${HOST_OVERRIDE:-}"
           if [ -z "$HOST" ]; then HOST="${FTP_HOST:-}"; fi
           if [ -z "$HOST" ]; then HOST="${FTP_SERVER:-}"; fi
           export FTP_CONNECT_HOST="$HOST"
-          test -n "${FTP_CONNECT_HOST:-}" || { echo "Missing host: set host_override, or secret FTP_HOST / FTP_SERVER"; exit 1; }
-          test -n "${FTP_USERNAME:-}" || { echo "Missing FTP_USERNAME — add secret FTP_USERNAME=buycarlftp@buycarl.com"; exit 1; }
+          test -n "${FTP_CONNECT_HOST:-}" || { echo "Missing host"; exit 1; }
+          test -n "${FTP_USERNAME:-}" || { echo "Missing FTP_USERNAME"; exit 1; }
           test -n "${FTP_PASSWORD:-}" || { echo "Missing FTP_PASSWORD"; exit 1; }
-          echo "Using FTP host: ${FTP_CONNECT_HOST} (do not use Cloudflare-proxied ftp.fengins.com)"
-          python3 - <<'PY'
-          import ftplib, os, ssl, sys, time
+          echo "Host=${FTP_CONNECT_HOST} mode=${FTP_MODE} root=${REMOTE_ROOT}"
+
+          python3 <<'PY'
+          import ftplib, os, ssl, sys, socket, subprocess, shlex
           from pathlib import Path
 
-          host = (os.environ.get("FTP_CONNECT_HOST") or "").strip()
-          port = int(os.environ.get("FTP_PORT") or "21")
+          host = os.environ["FTP_CONNECT_HOST"].strip()
           user = os.environ["FTP_USERNAME"]
           password = os.environ["FTP_PASSWORD"]
-          root = os.environ.get("REMOTE_ROOT") or "/"
+          root = (os.environ.get("REMOTE_ROOT") or "/").strip() or "/"
           mode = (os.environ.get("FTP_MODE") or "auto").lower()
           include_plugins = (os.environ.get("INCLUDE_PLUGINS") or "true").lower() == "true"
+          ftp_port = int(os.environ.get("FTP_PORT") or "21")
+          sftp_port = 21098  # Namecheap cPanel SSH/SFTP
           out = Path("legacy-ftp")
           out.mkdir(parents=True, exist_ok=True)
-          if not host:
-              raise SystemExit("FTP host empty")
-          # Guard: Cloudflare DNS for ftp.fengins.com breaks FTP
-          if "fengins.com" in host.lower() and not host.replace(".", "").isdigit():
-              print("WARNING: hostname looks Cloudflare-proxied; prefer IP 209.74.67.142")
 
-          def connect(kind: str):
-              print(f"== Connecting {kind} {host}:{port} as {user!r} ==")
+          CANDIDATE_ROOTS = [
+              root,
+              "/",
+              "public_html",
+              "/public_html",
+              "buycarl.com",
+              "/buycarl.com",
+              "home/fengrmkw/buycarl.com",
+              "/home/fengrmkw/buycarl.com",
+              "domains/buycarl.com/public_html",
+              "/domains/buycarl.com/public_html",
+          ]
+
+          def ftp_connect(kind: str):
+              print(f"== FTP connect {kind} {host}:{ftp_port} ==")
               if kind == "ftps":
                   ctx = ssl.create_default_context()
                   ctx.check_hostname = False
                   ctx.verify_mode = ssl.CERT_NONE
-                  ftp = ftplib.FTP_TLS(context=ctx, timeout=45)
-                  ftp.connect(host, port)
+                  ftp = ftplib.FTP_TLS(context=ctx, timeout=60)
+                  ftp.connect(host, ftp_port)
                   ftp.login(user, password)
+                  ftp.set_pasv(True)
                   try:
                       ftp.prot_p()
                   except Exception as e:
-                      print(f"prot_p warning: {e}")
+                      print("prot_p:", e)
                   return ftp
-              ftp = ftplib.FTP(timeout=45)
-              ftp.connect(host, port)
+              ftp = ftplib.FTP(timeout=60)
+              ftp.connect(host, ftp_port)
               ftp.login(user, password)
+              ftp.set_pasv(True)
               return ftp
 
-          def try_connect():
-              order = ["ftps", "ftp"] if mode == "auto" else [mode]
-              last = None
-              for kind in order:
-                  try:
-                      return connect(kind), kind
-                  except Exception as e:
-                      last = e
-                      print(f"FAIL {kind}: {type(e).__name__}: {e}")
-              raise SystemExit(f"Could not connect with modes {order}: {last}")
+          def list_names(ftp):
+              names = []
+              # Prefer NLST (simpler); fall back to LIST parse; print errors
+              try:
+                  names = ftp.nlst()
+                  print(f"NLST ok: {len(names)} entries")
+                  return [n.split("/")[-1] for n in names if n not in (".", "..")]
+              except Exception as e:
+                  print(f"NLST failed: {type(e).__name__}: {e}")
+              lines = []
+              try:
+                  ftp.retrlines("LIST", lines.append)
+                  print(f"LIST ok: {len(lines)} lines")
+                  for line in lines[:50]:
+                      print(" ", line)
+                  out_names = []
+                  for line in lines:
+                      parts = line.split(maxsplit=8)
+                      if len(parts) >= 9:
+                          out_names.append(parts[8])
+                      elif len(parts) == 1:
+                          out_names.append(parts[0])
+                  return [n for n in out_names if n not in (".", "..")]
+              except Exception as e:
+                  print(f"LIST failed: {type(e).__name__}: {e}")
+              return []
 
-          ftp, used = try_connect()
-          print(f"Connected with {used}")
-          print("Welcome:", getattr(ftp, "welcome", "")[:200])
-
-          # Normalize / navigate
-          try:
-              ftp.cwd(root)
-          except Exception as e:
-              print(f"cwd({root!r}) failed: {e}")
-              print("Trying common Namecheap roots...")
-              for cand in ["/", "/public_html", "/buycarl.com", "/home/fengrmkw/buycarl.com", "public_html", "buycarl.com"]:
+          def find_site_root_ftp(ftp):
+              # Blind cwd probes even if listing is empty (common FTPS PASV issue)
+              tried = []
+              for cand in CANDIDATE_ROOTS:
+                  if cand in tried:
+                      continue
+                  tried.append(cand)
                   try:
                       ftp.cwd(cand)
-                      print(f"OK cwd -> {cand}")
-                      root = cand
-                      break
-                  except Exception as e2:
-                      print(f"  miss {cand}: {e2}")
-              else:
-                  raise SystemExit("Could not cwd into a known site root. Check FTP login home with FileZilla.")
+                  except Exception as e:
+                      print(f"cwd miss {cand!r}: {e}")
+                      continue
+                  pwd = ftp.pwd()
+                  print(f"cwd ok -> {cand!r} PWD={pwd}")
+                  names = list_names(ftp)
+                  print(f"entries at {pwd}: {names[:40]}")
+                  # success if 00 or wp-content present OR we can cwd into them
+                  lower = {n.lower() for n in names}
+                  if "00" in lower or "wp-content" in lower:
+                      return pwd, names
+                  ok = []
+                  for need in ("00", "wp-content"):
+                      try:
+                          cur = ftp.pwd()
+                          ftp.cwd(need)
+                          ftp.cwd(cur)
+                          ok.append(need)
+                      except Exception:
+                          pass
+                  if ok:
+                      print(f"blind cwd found: {ok}")
+                      return pwd, names + ok
+              raise SystemExit("Could not find a folder containing 00 / wp-content via FTP")
 
-          pwd = ftp.pwd()
-          print("PWD:", pwd)
-          names = []
-          ftp.retrlines("LIST", names.append)
-          print("LIST (first 40):")
-          for line in names[:40]:
-              print(" ", line)
-          listing = "\n".join(names).lower()
-
-          targets = []
-          # Prefer exact folder names
-          for folder, dest in [
-              ("00", out / "00"),
-              ("wp-content", out / "wp-content"),
-          ]:
-              if any(f" {folder.lower()}" in line.lower() or line.lower().endswith(folder.lower()) for line in names):
-                  targets.append((folder, dest))
-              else:
-                  print(f"NOTE: {folder!r} not obvious in listing")
-
-          if not targets:
-              # Maybe already inside public_html but folders named differently
-              print("No 00/wp-content found at this root. Full names:")
-              for line in names:
-                  print(" ", line)
-              raise SystemExit("Wrong remote_root — re-run with the folder that contains 00 and wp-content (check FileZilla).")
-
-          def ensure_dir(p: Path):
-              p.mkdir(parents=True, exist_ok=True)
-
-          def is_dir(ftp, name):
+          def mirror_ftp(ftp, remote_path: str, local: Path, depth=0, only=None):
+              """only: optional set of top-level names to keep when remote_path endswith wp-content"""
+              local.mkdir(parents=True, exist_ok=True)
+              skip = {".git", "node_modules", "cache", "uploads", "upgrade", "ai1wm-backups", ".", ".."}
+              # cwd based listing is more reliable than LIST path
               cur = ftp.pwd()
-              try:
-                  ftp.cwd(name)
-                  ftp.cwd(cur)
-                  return True
-              except Exception:
-                  return False
-
-          stats = {"files": 0}
-
-          def mirror(remote_path: str, local: Path, depth=0, max_depth=30):
-              if depth > max_depth:
-                  return
-              ensure_dir(local)
-              # skip junk
-              skip_names = {".git", "node_modules", "cache", "uploads", "upgrade", "ai1wm-backups"}
-              entries = []
-              try:
-                  ftp.retrlines(f"LIST {remote_path}", entries.append)
-              except Exception:
-                  entries = []
-                  ftp.cwd(remote_path)
-                  ftp.retrlines("LIST", entries.append)
-                  ftp.cwd("..")
-
-              # Parse crude LIST
-              for line in entries:
-                  parts = line.split(maxsplit=8)
-                  if len(parts) < 9:
+              ftp.cwd(remote_path)
+              names = list_names(ftp)
+              files = 0
+              for name in names:
+                  if name in skip:
                       continue
-                  name = parts[8]
-                  if name in (".", "..") or name in skip_names:
+                  if only is not None and name not in only:
                       continue
-                  # For wp-content, only themes (+ plugins optionally)
-                  if remote_path.rstrip("/").endswith("wp-content") and name not in (
-                      ("themes", "plugins") if include_plugins else ("themes",)
-                  ):
-                      if name not in ("themes", "plugins"):
-                          continue
-                      if name == "plugins" and not include_plugins:
-                          continue
-                  remote = f"{remote_path.rstrip('/')}/{name}"
-                  local_path = local / name
-                  if line.startswith("d") or is_dir(ftp, remote):
-                      print(f"{'  '*depth}DIR {remote}")
-                      mirror(remote, local_path, depth + 1, max_depth)
+                  # detect dir
+                  isdir = False
+                  try:
+                      ftp.cwd(name)
+                      ftp.cwd("..")
+                      isdir = True
+                  except Exception:
+                      isdir = False
+                  lp = local / name
+                  if isdir:
+                      print(f"{'  '*depth}DIR {remote_path}/{name}")
+                      files += mirror_ftp(ftp, name, lp, depth + 1, only=None)
+                      ftp.cwd(cur if depth == 0 else "..")  # may already be parent
+                      # Ensure we are back in remote_path
+                      ftp.cwd(cur)
+                      ftp.cwd(remote_path)
                   else:
-                      ensure_dir(local_path.parent)
-                      print(f"{'  '*depth}GET {remote}")
-                      with open(local_path, "wb") as f:
-                          ftp.retrbinary(f"RETR {remote}", f.write)
-                      stats["files"] += 1
+                      print(f"{'  '*depth}GET {remote_path}/{name}")
+                      with open(lp, "wb") as f:
+                          ftp.retrbinary(f"RETR {name}", f.write)
+                      files += 1
+              ftp.cwd(cur)
+              return files
 
-          for folder, dest in targets:
-              print(f"== Mirroring {folder} -> {dest} ==")
-              mirror(folder, dest)
+          def download_via_ftp(kind: str):
+              ftp = ftp_connect(kind)
+              print("Welcome:", (ftp.welcome or "")[:180])
+              site, names = find_site_root_ftp(ftp)
+              print(f"Using site root PWD={site}")
+              total = 0
+              # download 00
+              try:
+                  total += mirror_ftp(ftp, "00", out / "00")
+              except Exception as e:
+                  print(f"00 mirror failed: {e}")
+              # download wp-content/themes (+plugins)
+              try:
+                  cur = ftp.pwd()
+                  ftp.cwd("wp-content")
+                  keep = {"themes", "plugins"} if include_plugins else {"themes"}
+                  total += mirror_ftp(ftp, ".", out / "wp-content", only=keep)
+                  # The above with remote '.' is messy; do explicit
+              except Exception as e:
+                  print(f"wp-content path A failed: {e}")
+              # Explicit themes/plugins
+              ftp.cwd(site)
+              for sub in (["themes", "plugins"] if include_plugins else ["themes"]):
+                  try:
+                      ftp.cwd(site)
+                      ftp.cwd("wp-content")
+                      total += mirror_ftp(ftp, sub, out / "wp-content" / sub)
+                  except Exception as e:
+                      print(f"wp-content/{sub} failed: {e}")
+              try:
+                  ftp.quit()
+              except Exception:
+                  pass
+              return total
 
-          ftp.quit()
-          print(f"Downloaded files: {stats['files']}")
-          if stats["files"] < 5:
-              raise SystemExit("Too few files downloaded — connection or path wrong.")
+          def download_via_lftp(ssl: bool):
+              """lftp often handles FTPS PASV better than stdlib."""
+              print(f"== lftp ssl={ssl} ==")
+              conf = out.parent / "lftp.conf"
+              # Use env password via LFTP open without embedding in process list too much
+              script = out.parent / "mirror.lftp"
+              ssl_cmds = """
+          set ftp:ssl-allow yes
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          """ if ssl else """
+          set ftp:ssl-allow no
+          set ftp:ssl-force no
+          """
+              plugins_line = "mirror -c --parallel=4 wp-content/plugins legacy-ftp/wp-content/plugins" if include_plugins else ""
+              body = f"""
+          set net:timeout 30
+          set net:max-retries 2
+          set ftp:passive-mode true
+          {ssl_cmds}
+          open -p {ftp_port} -u {user},{password} {host}
+          cls -1
+          """
+              # Try several cds
+              probes = []
+              for cand in CANDIDATE_ROOTS:
+                  probes.append(f"cd {cand} && cls -1 && echo ROOT_OK:{cand}")
+              body += "\n".join(probes) + "\n"
+              script.write_text(body)
+              # First pass: discover root
+              p = subprocess.run(["lftp", "-f", str(script)], capture_output=True, text=True, timeout=120)
+              print(p.stdout[-2000:])
+              print(p.stderr[-1000:])
+              root_ok = None
+              for line in (p.stdout or "").splitlines():
+                  if "ROOT_OK:" in line:
+                      root_ok = line.split("ROOT_OK:", 1)[1].strip()
+              if not root_ok:
+                  # if cls at login home shows 00
+                  if "\n00\n" in ("\n" + p.stdout + "\n") or p.stdout.strip() == "00":
+                      root_ok = "."
+              if not root_ok:
+                  raise RuntimeError("lftp could not discover root")
+              print("lftp root:", root_ok)
+              mirror = f"""
+          set net:timeout 30
+          set net:max-retries 2
+          set ftp:passive-mode true
+          {ssl_cmds}
+          open -p {ftp_port} -u {user},{password} {host}
+          cd {root_ok}
+          mirror -c --parallel=4 --exclude-glob .git/ --exclude-glob node_modules/ --exclude-glob cache/ --exclude-glob *.log 00 legacy-ftp/00
+          mirror -c --parallel=4 --exclude-glob .git/ --exclude-glob node_modules/ wp-content/themes legacy-ftp/wp-content/themes
+          {plugins_line}
+          bye
+          """
+              script.write_text(mirror)
+              p2 = subprocess.run(["lftp", "-f", str(script)], capture_output=True, text=True, timeout=10000)
+              print(p2.stdout[-2000:])
+              print(p2.stderr[-2000:])
+              if p2.returncode != 0:
+                  raise RuntimeError(f"lftp mirror rc={p2.returncode}")
+              # count files
+              return sum(1 for _ in out.rglob("*") if _.is_file())
+
+          def download_via_sftp():
+              print(f"== SFTP {host}:{sftp_port} ==")
+              # Use sshpass + sftp batch if available; else paramiko via pip
+              try:
+                  import paramiko  # type: ignore
+              except ImportError:
+                  subprocess.check_call([sys.executable, "-m", "pip", "install", "paramiko", "-q"])
+                  import paramiko  # type: ignore
+
+              t = paramiko.Transport((host, sftp_port))
+              t.connect(username=user, password=password)
+              sftp = paramiko.SFTPClient.from_transport(t)
+
+              def exists(path):
+                  try:
+                      sftp.stat(path)
+                      return True
+                  except Exception:
+                      return False
+
+              site = None
+              for cand in CANDIDATE_ROOTS + ["."]:
+                  p = cand if cand != "/" else "."
+                  if exists(f"{p}/00") or exists(f"{p}/wp-content"):
+                      site = p
+                      break
+                  # also try listing
+                  try:
+                      names = sftp.listdir(p)
+                      print(f"sftp listdir {p}: {names[:30]}")
+                      if "00" in names or "wp-content" in names:
+                          site = p
+                          break
+                  except Exception as e:
+                      print(f"sftp miss {p}: {e}")
+              if not site:
+                  raise RuntimeError("SFTP: no site root with 00/wp-content")
+              print("SFTP site:", site)
+
+              def mirror(remote, local, depth=0, filter_children=None):
+                  local = Path(local)
+                  local.mkdir(parents=True, exist_ok=True)
+                  files = 0
+                  for attr in sftp.listdir_attr(remote):
+                      name = attr.filename
+                      if name in (".", "..", "uploads", "cache", "node_modules", ".git"):
+                          continue
+                      if filter_children is not None and name not in filter_children:
+                          continue
+                      r = f"{remote.rstrip('/')}/{name}"
+                      l = local / name
+                      if (attr.st_mode & 0o170000) == 0o040000:
+                          print(f"{'  '*depth}DIR {r}")
+                          files += mirror(r, l, depth + 1)
+                      else:
+                          print(f"{'  '*depth}GET {r}")
+                          sftp.get(r, str(l))
+                          files += 1
+                  return files
+
+              total = 0
+              total += mirror(f"{site}/00", out / "00")
+              wc = f"{site}/wp-content"
+              keep = ["themes", "plugins"] if include_plugins else ["themes"]
+              total += mirror(wc, out / "wp-content", filter_children=set(keep))
+              sftp.close()
+              t.close()
+              return total
+
+          total = 0
+          errors = []
+          order = []
+          if mode == "auto":
+              order = ["ftps", "lftp-ftps", "ftp", "lftp-ftp", "sftp"]
+          elif mode == "ftps":
+              order = ["ftps", "lftp-ftps", "sftp"]
+          elif mode == "ftp":
+              order = ["ftp", "lftp-ftp", "sftp"]
+          elif mode == "sftp":
+              order = ["sftp"]
+          else:
+              order = [mode]
+
+          for kind in order:
+              try:
+                  if kind == "ftps":
+                      total = download_via_ftp("ftps")
+                  elif kind == "ftp":
+                      total = download_via_ftp("ftp")
+                  elif kind == "lftp-ftps":
+                      total = download_via_lftp(True)
+                  elif kind == "lftp-ftp":
+                      total = download_via_lftp(False)
+                  elif kind == "sftp":
+                      total = download_via_sftp()
+                  else:
+                      continue
+                  print(f"SUCCESS via {kind}, files={total}")
+                  if total >= 5:
+                      break
+                  errors.append(f"{kind}: too few files ({total})")
+              except Exception as e:
+                  print(f"FAIL {kind}: {type(e).__name__}: {e}")
+                  errors.append(f"{kind}: {e}")
+
+          if total < 5:
+              raise SystemExit("All methods failed or too few files:\n- " + "\n- ".join(errors))
+          print(f"DONE files={total}")
           PY
 
-          echo "## Local sizes"
+          echo "## sizes"
           du -sh legacy-ftp legacy-ftp/* legacy-ftp/wp-content/* 2>/dev/null || true
-          find legacy-ftp -maxdepth 3 -type d | head -100
+          find legacy-ftp -maxdepth 3 -type d | head -80
 
       - name: Pack artifact
         run: |
@@ -232,7 +431,6 @@ jobs:
             SIZE_MB=$(du -sm legacy-ftp/wp-content/plugins | awk '{print $1}')
             echo "plugins size: ${SIZE_MB}MB"
             if [ "$SIZE_MB" -gt 400 ]; then
-              echo "Plugins tree large — keeping name matches only"
               mkdir -p /tmp/plugins-keep
               find legacy-ftp/wp-content/plugins -mindepth 1 -maxdepth 1 -type d \
                 \( -iname '*race*' -o -iname '*hkjc*' -o -iname '*horse*' -o -iname '*m6*' -o -iname '*mark*' -o -iname '*yoast*' -o -iname '*buycarl*' -o -iname '*carl*' -o -iname '*custom*' \) \
@@ -252,14 +450,8 @@ jobs:
           name: legacy-ftp
           path: legacy-ftp.tgz
           retention-days: 7
-          if-no-files-found: error
 
       - name: Summary
         run: |
-          {
-            echo "### Legacy FTP fetch"
-            echo
-            ls -lh legacy-ftp.tgz
-            echo
-            echo "Tell the Cloud Agent: **FTP fetch done**"
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Tell Cloud Agent: **FTP fetch done**" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh legacy-ftp.tgz >> "$GITHUB_STEP_SUMMARY"
