@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadratic Equation Explorer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: #a0c4ff; margin-bottom: 30px; }
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .card h2 {
+    color: #64ffda;
+    margin-bottom: 16px;
+    font-size: 1.4em;
+    border-bottom: 2px solid rgba(100, 255, 218, 0.3);
+    padding-bottom: 8px;
+  }
+  .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .input-group { display: flex; flex-direction: column; }
+  .input-group label { color: #a0c4ff; margin-bottom: 6px; font-weight: 600; font-size: 0.95em; }
+  .input-group input {
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1.1em;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .input-group input:focus { outline: none; border-color: #64ffda; background: rgba(255, 255, 255, 0.12); }
+  .equation-display {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+    font-size: 1.3em;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    color: #ffd166;
+    word-break: break-all;
+  }
+  .step-box {
+    background: rgba(100, 255, 218, 0.05);
+    border-left: 4px solid #64ffda;
+    padding: 14px 18px;
+    margin: 10px 0;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.7;
+  }
+  .step-box .step-label { color: #64ffda; font-weight: 700; margin-bottom: 4px; display: block; }
+  .formula-box {
+    background: rgba(255, 209, 102, 0.08);
+    border: 1px dashed rgba(255, 209, 102, 0.4);
+    padding: 14px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-family: 'Courier New', monospace;
+    color: #ffd166;
+    text-align: center;
+  }
+  canvas {
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+  }
+  .canvas-container { text-align: center; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .info-item { background: rgba(255, 255, 255, 0.04); padding: 14px; border-radius: 10px; }
+  .info-item .label { color: #a0c4ff; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; }
+  .info-item .value { color: #fff; font-size: 1.2em; font-weight: 600; margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 700;
+  }
+  .badge-green { background: rgba(100, 255, 218, 0.2); color: #64ffda; }
+  .badge-yellow { background: rgba(255, 209, 102, 0.2); color: #ffd166; }
+  .badge-red { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+  .badge-blue { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
+  .tag { font-weight: 700; }
+  .error-msg { color: #ff6b6b; text-align: center; padding: 10px; font-weight: 600; display: none; }
+  .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .term {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 12px 14px;
+    border-radius: 8px;
+    border-top: 3px solid #64ffda;
+  }
+  .term strong { color: #64ffda; }
+  .behavior-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 14px;
+    margin: 8px 0;
+    line-height: 1.7;
+  }
+  .status { color: #aaa; text-align: center; margin-top: 10px; font-size: 0.9em; }
+  .example-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .example-card:hover { background: rgba(100,255,218,0.06); border-color: rgba(100,255,218,0.4); }
+  .example-num { font-size:0.8em; color:#64ffda; font-weight:700; letter-spacing:1px; }
+  .example-q { color:#fff; font-size:1.05em; margin-top:4px; }
+  .hkdse-sol {
+    background: rgba(255,209,102,0.05);
+    border-left: 4px solid #ffd166;
+    padding: 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    line-height: 1.8;
+  }
+  .hkdse-sol .step { color: #64ffda; font-weight: 700; margin: 10px 0 4px; display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>&#x1F4D0; Quadratic Equation Explorer</h1>
+  <p class="subtitle">For high school students &mdash; Interactive Theory &amp; Application</p>
+
+  <div class="card">
+    <h2>&#x1F522; Enter Coefficients</h2>
+    <p style="margin-bottom:14px;color:#ccc;">General form: <span class="formula-box" style="display:inline;padding:6px 12px;border-radius:4px;">ax&sup2; + bx + c = 0</span></p>
+    <div class="inputs">
+      <div class="input-group"><label>a (quadratic)</label><input type="number" id="a" value="1" step="any"></div>
+      <div class="input-group"><label>b (linear)</label><input type="number" id="b" value="-3" step="any"></div>
+      <div class="input-group"><label>c (constant)</label><input type="number" id="c" value="2" step="any"></div>
+    </div>
+    <div id="error-msg" class="error-msg">&#x26A0; Value of <strong>a</strong> cannot be zero (would not be quadratic).</div>
+    <div class="equation-display" id="equation-display"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#x1F4D6; Terminology</h2>
+    <div class="glossary" id="glossary"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#x1F9EE; Step-by-Step Solution</h2>
+    <div id="solution-steps"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#x1F4CA; Curve Behaviour</h2>
+    <div class="info-grid" id="behavior-info"></div>
+    <div class="behavior-box" id="behavior-note" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#x1F4DA; HKDSE Exam Practice — 10 Examples</h2>
+    <p style="color:#aaa;margin-bottom:14px;">Click any example to load the equation and see the full solution.</p>
+    <div id="hkdse-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;"></div>
+    <div id="hkdse-solution" class="hkdse-sol" style="margin-top:18px;display:none;"></div>
+  </div>
+
+  <div class="card">
+    <h2>&#x1F4C9; Graph</h2>
+    <div class="canvas-container"><canvas id="graph"></canvas></div>
+    <div class="status">Green dot = vertex | Red circles = roots | Blue line = axis of symmetry</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  if (!window.addEventListener) return;
+
+  var A = document.getElementById('a');
+  var B = document.getElementById('b');
+  var C = document.getElementById('c');
+  var eqDisplay = document.getElementById('equation-display');
+  var stepsDiv = document.getElementById('solution-steps');
+  var behaviorGrid = document.getElementById('behavior-info');
+  var behaviorNote = document.getElementById('behavior-note');
+  var errorMsg = document.getElementById('error-msg');
+  var canvas = document.getElementById('graph');
+  var ctx = null;
+  try { ctx = canvas.getContext('2d'); } catch(e) { ctx = null; }
+
+  function term(coef, v, isConst) {
+    if (coef === 0) return '';
+    var abs = Math.abs(coef);
+    var s = '';
+    if (!isConst) {
+      if (abs === 1) s = v;
+      else s = abs + v;
+    } else {
+      s = abs;
+    }
+    if (coef < 0) s = '− ' + s;
+    else if (s !== '') s = '+ ' + s;
+    return s;
+  }
+
+  function toStringEq(a, b, c) {
+    var s = term(a, 'x²', false) + ' ' + term(b, 'x', false) + ' ' + term(c, '', true);
+    s = s.trim();
+    if (s.indexOf('+ ') === 0) s = s.slice(2);
+    if (!s) s = '0';
+    return s + ' = 0';
+  }
+
+  function disc(a, b, c) { return b * b - 4 * a * c; }
+
+  function sqrtComplex(d) {
+    if (d >= 0) return { real: Math.sqrt(d), imag: 0 };
+    return { real: 0, imag: Math.sqrt(-d) };
+  }
+
+  function rRound(v, d) { return Math.round(v * Math.pow(10, d)) / Math.pow(10, d); }
+
+  function updateGlossary(a, b, c, d, vertex) {
+    var items = [
+      { label: 'Standard Form', val: 'ax\u00B2 + bx + c = 0' },
+      { label: 'a (Leading Coefficient)', val: a + ' \u2192 opens ' + (a > 0 ? 'upward' : 'downward') },
+      { label: 'b (Linear Coeff.)', val: String(b) },
+      { label: 'c (Constant)', val: c + ' \u2192 y-intercept' },
+      { label: 'Discriminant (\u0394)', val: String(d) },
+      { label: 'Vertex', val: '(' + rRound(vertex.x,2) + ', ' + rRound(vertex.y,2) + ')' },
+      { label: 'Axis of Symmetry', val: 'x = ' + rRound(-b/(2*a),2) },
+      { label: 'Domain', val: '\u211D (all real numbers)' },
+      { label: 'Range', val: a > 0 ? '[' + rRound(vertex.y,2) + ', \u221E)' : '(-\u221E, ' + rRound(vertex.y,2) + ']' },
+      { label: 'Parabola', val: 'U-shaped curve' },
+      { label: 'Root / x-intercept', val: d > 0 ? '2 distinct real' : d === 0 ? '1 repeated real' : '2 complex conjugates' },
+      { label: 'Quadratic Formula', val: 'x = (\u2212b \u00B1 \u221A\u0394) / 2a' }
+    ];
+    var out = '';
+    for (var i = 0; i < items.length; i++) {
+      out += '<div class="term"><strong>' + items[i].label + '</strong><br><span style="color:#e0e0e0;font-size:0.9em;">' + items[i].val + '</span></div>';
+    }
+    var g = document.getElementById('glossary');
+    if (g) g.innerHTML = out;
+  }
+
+  function updateBehavior(a, b, c, d, vertex) {
+    var items = [];
+    items.push({ label: 'Opening', value: a > 0 ? 'upward \u2191' : 'downward \u2193', badge: a > 0 ? 'badge-green' : 'badge-yellow' });
+    items.push({ label: 'Vertex', value: '(' + rRound(vertex.x,2) + ', ' + rRound(vertex.y,2) + ')', badge: 'badge-blue' });
+    items.push({ label: 'y-intercept', value: '(0, ' + c + ')', badge: 'badge-blue' });
+    if (d >= 0) {
+      var x1 = (-b - Math.sqrt(d)) / (2 * a);
+      var x2 = (-b + Math.sqrt(d)) / (2 * a);
+      items.push({ label: 'x-intercepts', value: '(' + rRound(x1,2) + ', 0) & (' + rRound(x2,2) + ', 0)', badge: 'badge-green' });
+    }
+    var type = d > 0 ? '2 distinct real roots' : d === 0 ? '1 repeated real root' : '2 complex roots';
+    var badgeType = d > 0 ? 'badge-green' : d === 0 ? 'badge-yellow' : 'badge-red';
+    items.push({ label: 'Root type', value: type, badge: badgeType });
+    items.push({ label: 'Axis of Symmetry', value: 'x = ' + rRound(-b/(2*a),2), badge: 'badge-yellow' });
+    items.push({ label: 'Increasing on', value: a > 0 ? 'x > ' + rRound(-b/(2*a),2) : 'x < ' + rRound(-b/(2*a),2), badge: 'badge-blue' });
+    items.push({ label: 'Decreasing on', value: a > 0 ? 'x < ' + rRound(-b/(2*a),2) : 'x > ' + rRound(-b/(2*a),2), badge: 'badge-blue' });
+
+    var out = '';
+    for (var i = 0; i < items.length; i++) {
+      out += '<div class="info-item"><div class="label">' + items[i].label + '</div><div class="value"><span class="badge ' + items[i].badge + '">' + items[i].value + '</span></div></div>';
+    }
+    if (behaviorGrid) behaviorGrid.innerHTML = out;
+
+    var note = '';
+    if (d > 0) note = 'The graph crosses the x-axis at two distinct points \u2014 two real solutions.';
+    else if (d === 0) note = 'The vertex touches the x-axis \u2014 one repeated real solution.';
+    else note = 'The graph never touches the x-axis \u2014 solutions are complex (no real roots).';
+    if (a > 0) note += ' The parabola opens upward, so the vertex is the minimum point.';
+    else note += ' The parabola opens downward, so the vertex is the maximum point.';
+    if (behaviorNote) behaviorNote.textContent = note;
+  }
+
+  function updateSteps(a, b, c, d) {
+    var vx = -b / (2 * a);
+    var vy = c - b * b / (4 * a);
+    var fpTex = d > 0 ? '\u2705 Two distinct real solutions' : d === 0 ? '\u2705 One repeated real solution' : '\u2139\uFE0F Two complex conjugate solutions (no x-intercepts)';
+    var html = '';
+    html += '<div class="formula-box">Standard Form: ' + a + 'x\u00B2 + (' + b + ')x + (' + c + ') = 0</div>';
+    html += '<div class="step-box"><span class="step-label">Step 1 \u2014 Identify a, b, c</span>a = ' + a + ', b = ' + b + ', c = ' + c + '</div>';
+    html += '<div class="step-box"><span class="step-label">Step 2 \u2014 Calculate the Discriminant \u0394 = b\u00B2 \u2212 4ac</span>';
+    html += '\u0394 = (' + b + ')\u00B2 \u2212 4(' + a + ')(' + c + ') = ' + (b*b) + ' \u2212 ' + (4*a*c) + ' = <b>' + rRound(d,4) + '</b></div>';
+    html += '<div class="step-box"><span class="step-label">Step 3 \u2014 Apply the Quadratic Formula</span>';
+    html += '<div class="formula-box">x = (\u2212b \u00B1 \u221A\u0394) / 2a</div>';
+    html += 'x = (\u2212(' + b + ') \u00B1 \u221A' + rRound(d,4) + ') / 2(' + a + ')</div>';
+    if (d >= 0) {
+      var sqrtD = Math.sqrt(d);
+      var x1 = (-b - sqrtD) / (2 * a);
+      var x2 = (-b + sqrtD) / (2 * a);
+      html += '<div class="step-box"><span class="step-label">Step 4 \u2014 Evaluate the roots</span>';
+      html += '\u221A\u0394 = ' + rRound(sqrtD,4);
+      html += '<br>x\u2081 = (\u2212' + b + ' \u2212 ' + rRound(sqrtD,4) + ') / ' + (2*a) + ' = <b>' + rRound(x1,4) + '</b>';
+      html += '<br>x\u2082 = (\u2212' + b + ' + ' + rRound(sqrtD,4) + ') / ' + (2*a) + ' = <b>' + rRound(x2,4) + '</b></div>';
+    } else {
+      var rc = sqrtComplex(d);
+      html += '<div class="step-box"><span class="step-label">Step 4 \u2014 Complex roots</span>';
+      html += '\u221A\u0394 = \u221A(\u2212' + rRound(-d,4) + ') = <b>' + rRound(rc.real,4) + ' + ' + rRound(rc.imag,4) + 'i</b></div>';
+      html += '<div class="step-box"><span class="step-label">Step 5 \u2014 Express complex roots</span>';
+      html += 'x\u2081 = (' + (-b) + ' \u2212 ' + rRound(rc.imag,4) + 'i) / ' + (2*a) + '<br>';
+      html += 'x\u2082 = (' + (-b) + ' + ' + rRound(rc.imag,4) + 'i) / ' + (2*a) + '</div>';
+    }
+    var stepNum = d >= 0 ? 5 : 6;
+    html += '<div class="step-box"><span class="step-label">Step ' + stepNum + ' \u2014 Vertex Form</span>';
+    html += 'x = h = \u2212b / 2a = ' + rRound(vx,4) + '<br>';
+    html += 'y = k = c \u2212 b\u00B2/4a = ' + rRound(vy,4) + '<br>';
+    html += '<div class="formula-box">Vertex form: ' + a + '(x \u2212 ' + rRound(vx,4) + ')\u00B2 + (' + rRound(vy,4) + ') = 0</div>';
+    html += 'Expanding back: ' + a + 'x\u00B2 + (' + b + ')x + (' + c + ') = 0 &#10003;</div>';
+    html += '<div class="step-box"><span class="step-label">Summary</span>' + fpTex + '</div>';
+    if (stepsDiv) stepsDiv.innerHTML = html;
+  }
+
+  function drawGraph() {
+    if (!ctx || !canvas) return;
+    try {
+      var dpr = window.devicePixelRatio || 1;
+      var w = canvas.clientWidth;
+      var h = canvas.clientHeight;
+      if (!w || !h) return;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.fillRect(0, 0, w, h);
+
+      var a = parseFloat(A.value);
+      var b = parseFloat(B.value) || 0;
+      var c = parseFloat(C.value) || 0;
+
+      if (isNaN(a) || a === 0) {
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = '16px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('Enter a non-zero value for a', w/2, h/2);
+        return;
+      }
+
+      var yOf = function(x) { return a * x * x + b * x + c; };
+      var d = b * b - 4 * a * c;
+      var vx = -b / (2 * a);
+      var vy = c - b * b / (4 * a);
+
+      var r0, r1;
+      if (d >= 0) {
+        r0 = (-b - Math.sqrt(d)) / (2 * a);
+        r1 = (-b + Math.sqrt(d)) / (2 * a);
+      }
+
+      var pts = [];
+      var xMin = Math.min(vx - 6, (d >= 0 ? Math.min(r0, r1) - 2 : -6));
+      var xMax = Math.max(vx + 6, (d >= 0 ? Math.max(r0, r1) + 2 : 6));
+      var px, x;
+      for (px = 0; px <= w; px++) {
+        x = xMin + (xMax - xMin) * (px / w);
+        pts.push({ px: px, x: x, y: yOf(x) });
+      }
+      var yVals = [];
+      for (var k = 0; k < pts.length; k++) yVals.push(pts[k].y);
+      var yMin0 = Math.min.apply(null, yVals);
+      var yMax0 = Math.max.apply(null, yVals);
+      var pad = Math.max(1, (yMax0 - yMin0) * 0.15);
+      var yMin = yMin0 - pad;
+      var yMax = yMax0 + pad;
+
+      var sx = function(x) { return (x - xMin) / (xMax - xMin) * w; };
+      var sy = function(y) { return h - (y - yMin) / (yMax - yMin) * h; };
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      var xi;
+      for (xi = Math.ceil(xMin); xi <= Math.floor(xMax); xi++) {
+        ctx.moveTo(sx(xi), 0);
+        ctx.lineTo(sx(xi), h);
+      }
+      var yi;
+      for (yi = Math.ceil(yMin); yi <= Math.floor(yMax); yi++) {
+        ctx.moveTo(0, sy(yi));
+        ctx.lineTo(w, sy(yi));
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(sx(0), 0);
+      ctx.lineTo(sx(0), h);
+      ctx.moveTo(0, sy(0));
+      ctx.lineTo(w, sy(0));
+      ctx.stroke();
+
+      ctx.strokeStyle = '#93c5fd';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx(vx), 0);
+      ctx.lineTo(sx(vx), h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = '#64ffda';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      var first = true;
+      for (var p = 0; p < pts.length; p++) {
+        if (first) { ctx.moveTo(pts[p].px, sy(pts[p].y)); first = false; }
+        else ctx.lineTo(pts[p].px, sy(pts[p].y));
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#64ffda';
+      ctx.beginPath();
+      ctx.arc(sx(vx), sy(vy), 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 11px Segoe UI';
+      ctx.textAlign = 'center';
+      ctx.fillText('V(' + rRound(vx, 1) + ', ' + rRound(vy, 1) + ')', sx(vx), sy(vy) - 12);
+
+      if (d >= 0) {
+        ctx.fillStyle = '#ff6b6b';
+        var rx;
+        for (rx in [r0, r1]) {
+          ctx.beginPath();
+          ctx.arc(sx([r0, r1][rx]), sy(0), 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.fillStyle = '#aaa';
+      ctx.font = '12px Segoe UI';
+      ctx.textAlign = 'left';
+      ctx.fillText('x: ' + rRound(xMin,1), 4, h - 4);
+      ctx.fillText('x: ' + rRound(xMax,1), w - 50, h - 4);
+      ctx.textAlign = 'right';
+      ctx.fillText('y: ' + rRound(yMax,1), 36, 14);
+      ctx.fillText('y: ' + rRound(yMin,1), 36, h - 4);
+    } catch (err) {
+      if (window.console) console.error('drawGraph error', err);
+    }
+  }
+
+  function compute() {
+    try {
+      var a = parseFloat(A.value);
+      var b = parseFloat(B.value) || 0;
+      var c = parseFloat(C.value) || 0;
+
+      if (isNaN(a) || a === 0) {
+        if (errorMsg) errorMsg.style.display = 'block';
+        if (eqDisplay) eqDisplay.textContent = 'a must not be 0';
+        return;
+      }
+      if (errorMsg) errorMsg.style.display = 'none';
+
+      if (eqDisplay) eqDisplay.innerHTML = 'f(x) = ' + toStringEq(a, b, c);
+      var d = disc(a, b, c);
+      var vx = -b / (2 * a);
+      var vy = c - b * b / (4 * a);
+      updateGlossary(a, b, c, d, { x: vx, y: vy });
+      updateBehavior(a, b, c, d, { x: vx, y: vy });
+      updateSteps(a, b, c, d);
+      drawGraph();
+    } catch (err) {
+      if (window.console) console.error('compute error', err);
+    }
+  }
+
+  function bind(el, fn) {
+    if (!el) return;
+    if (el.addEventListener) { el.addEventListener('input', fn, false); el.addEventListener('change', fn, false); }
+    else if (el.attachEvent) { el.attachEvent('oninput', fn); el.attachEvent('onchange', fn); }
+  }
+
+  var EXAMPLES = [
+    { n: 1, title: 'Factorable (two roots)', q: 'Solve x\u00B2 \u2212 5x + 6 = 0', a: 1, b: -5, c: 6,
+      steps: [
+        'Identify a=1, b=\u22125, c=6.',
+        '\u0394 = b\u00B2 \u2212 4ac = 25 \u2212 24 = <b>1</b>.',
+        'Apply quadratic formula: x = (5 \u00B1 1) / 2.',
+        'x\u2081 = 4/2 = <b>2</b>,  x\u2082 = 6/2 = <b>3</b>.',
+        'Graph crosses x-axis at x=2 and x=3.'
+      ] },
+    { n: 2, title: 'Equal real roots', q: 'Solve x\u00B2 \u2212 4x + 4 = 0', a: 1, b: -4, c: 4,
+      steps: [
+        'Identify a=1, b=\u22124, c=4.',
+        '\u0394 = 16 \u2212 16 = <b>0</b> \u2192 one repeated root.',
+        'x = 4 / 2 = <b>2</b> (double root).',
+        'Vertex touches x-axis at (2,0).'
+      ] },
+    { n: 3, title: 'Negative linear coeff.', q: 'Solve x\u00B2 + x \u2212 6 = 0', a: 1, b: 1, c: -6,
+      steps: [
+        'Identify a=1, b=1, c=\u22126.',
+        '\u0394 = 1 + 24 = <b>25</b>.',
+        'x = (\u22121 \u00B1 5) / 2.',
+        'x\u2081 = \u22123,  x\u2082 = <b>2</b>.'
+      ] },
+    { n: 4, title: 'Negative a (downward)', q: 'Solve \u2212x\u00B2 + 2x + 3 = 0', a: -1, b: 2, c: 3,
+      steps: [
+        'a=\u22121 \u2192 parabola opens downward.',
+        '\u0394 = 4 + 12 = <b>16</b>.',
+        'x = (\u22122 \u00B1 4) / (\u22122).',
+        'x\u2081 = <b>\u22121</b>,  x\u2082 = <b>3</b>.'
+      ] },
+    { n: 5, title: 'Complex roots', q: 'Solve x\u00B2 + x + 1 = 0', a: 1, b: 1, c: 1,
+      steps: [
+        'Identify a=1, b=1, c=1.',
+        '\u0394 = 1 \u2212 4 = <b>\u22123</b> \u2192 no real roots.',
+        '\u221A\u0394 = \u221Ai\u221A3 \u2248 <b>1.732i</b>.',
+        'x\u2081 = (\u22121 \u2212 i\u221A3)/2,  x\u2082 = (\u22121 + i\u221A3)/2.'
+      ] },
+    { n: 6, title: 'Vertex form by completing square', q: 'Solve 2x\u00B2 \u2212 8x + 6 = 0 by completing the square', a: 2, b: -8, c: 6,
+      steps: [
+        'Divide by 2: x\u00B2 \u2212 4x + 3 = 0.',
+        'Move constant: x\u00B2 \u2212 4x = \u22123.',
+        'Add (b/2)\u00B2: (b/2)\u00B2 = (\u22122)\u00B2 = 4.',
+        'x\u00B2 \u2212 4x + 4 = 1  \u2192  (x\u22122)\u00B2 = 1.',
+        'x \u2212 2 = \u00B11  \u2192  x = <b>1</b> or <b>3</b>.'
+      ] },
+    { n: 7, title: 'Geometry word problem', q: 'A rectangle has width w and length w+4. If area = 21, find w.', a: 1, b: 4, c: -21,
+      steps: [
+        'w(w+4)=21  \u2192  w\u00B2 + 4w \u2212 21 = 0.',
+        '\u0394 = 16 + 84 = <b>100</b>.',
+        'w = (\u22124 \u00B1 10)/2.',
+        'Width = <b>3</b> (reject negative \u22127). Length = 7.',
+        'Check: 3 \u00D7 7 = 21 \u2713.'
+      ] },
+    { n: 8, title: 'Projectile motion (DSE style)', q: 'h = \u2212t\u00B2 + 4t (height in m, t in s). When does it land?', a: -1, b: 4, c: 0,
+      steps: [
+        'Set h=0: \u2212t\u00B2 + 4t = 0.',
+        'Factor: t(\u2212t + 4) = 0.',
+        't = <b>0</b> s (launch) or t = <b>4</b> s (lands).',
+        'Maximum at t = \u22124/(2\u00D7\u22121) = <b>2</b> s.'
+      ] },
+    { n: 9, title: 'Sum and product of roots', q: 'If roots of 2x\u00B2 \u2212 3x \u2212 2 = 0 are \u03B1 and \u03B2, find \u03B1+\u03B2 and \u03B1\u03B2', a: 2, b: -3, c: -2,
+      steps: [
+        'Using Vieta\'s formulas:',
+        '\u03B1 + \u03B2 = \u2212b/a = 3/2 = <b>1.5</b>',
+        '\u03B1\u03B2 = c/a = \u22122/2 = <b>\u22121</b>'
+      ] },
+    { n: 10, title: 'Optimization / vertex form', q: 'Express y = x\u00B2 \u2212 6x + 5 in vertex form and find min.', a: 1, b: -6, c: 5,
+      steps: [
+        'h = \u2212b/2a = 6/2 = <b>3</b>.',
+        'k = c \u2212 b\u00B2/4a = 5 \u2212 36/4 = 5 \u2212 9 = <b>\u22124</b>.',
+        'Vertex form: y = (x\u22123)\u00B2 \u2212 4.',
+        'Minimum value = <b>\u22124</b> at x=3.'
+      ] },
+    { n: 11, title: 'Expression: \u03B1\u00B2+\u03B2\u00B2', q: 'For x\u00B2 \u2212 5x + 6 = 0 with roots \u03B1,\u03B2, find \u03B1\u00B2+\u03B2\u00B2', a: 1, b: -5, c: 6,
+      steps: [
+        '\u03B1+\u03B2 = 5,  \u03B1\u03B2 = 6.',
+        '\u03B1\u00B2+\u03B2\u00B2 = (\u03B1+\u03B2)\u00B2 \u2212 2\u03B1\u03B2 = 25 \u2212 12 = <b>13</b>.'
+      ] },
+    { n: 12, title: 'New eq: roots 1/\u03B1, 1/\u03B2', q: 'Find eq with roots 1/\u03B1 and 1/\u03B2 if roots of x\u00B2 \u2212 3x + 2 = 0 are \u03B1,\u03B2', a: 1, b: -3, c: 2,
+      steps: [
+        '\u03B1+\u03B2=3, \u03B1\u03B2=2.',
+        'Sum of new roots = (1/\u03B1+1/\u03B2) = (\u03B1+\u03B2)/\u03B1\u03B2 = 3/2.',
+        'Product = 1/(\u03B1\u03B2) = 1/2.',
+        'New eq: x\u00B2 \u2212 (3/2)x + 1/2 = 0  \u2192  <b>2x\u00B2 \u2212 3x + 1 = 0</b>.'
+      ] },
+    { n: 13, title: 'Expression: (\u03B1+1)(\u03B2+1)', q: 'Find (\u03B1+1)(\u03B2+1) if \u03B1,\u03B2 are roots of x\u00B2 \u2212 4x + 3 = 0', a: 1, b: -4, c: 3,
+      steps: [
+        '\u03B1+\u03B2=4, \u03B1\u03B2=3.',
+        '(\u03B1+1)(\u03B2+1) = \u03B1\u03B2 + (\u03B1+\u03B2) + 1 = 3 + 4 + 1 = <b>8</b>.'
+      ] },
+    { n: 14, title: 'New eq: roots \u03B1\u00B2, \u03B2\u00B2', q: 'Find eq with roots \u03B1\u00B2 and \u03B2\u00B2 if \u03B1,\u03B2 of x\u00B2 \u2212 2x \u2212 8 = 0', a: 1, b: -2, c: -8,
+      steps: [
+        '\u03B1+\u03B2=2, \u03B1\u03B2=\u22128.',
+        '\u03B1\u00B2+\u03B2\u00B2 = 4 \u2212 2(\u22128) = 4+16 = <b>20</b>.',
+        '\u03B1\u00B2\u03B2\u00B2 = (\u03B1\u03B2)\u00B2 = 64.',
+        'New eq: x\u00B2 \u2212 20x + <b>64</b> = 0.'
+      ] },
+    { n: 15, title: 'Expression: \u03B1\u00B3+\u03B2\u00B3', q: 'Find \u03B1\u00B3+\u03B2\u00B3 if roots of x\u00B2 \u2212 7x + 10 = 0 are \u03B1,\u03B2', a: 1, b: -7, c: 10,
+      steps: [
+        '\u03B1+\u03B2=7, \u03B1\u03B2=10.',
+        '\u03B1\u00B3+\u03B2\u00B3 = (\u03B1+\u03B2)\u00B3 \u2212 3\u03B1\u03B2(\u03B1+\u03B2) = 343 \u2212 210 = <b>133</b>.'
+      ] }
+  ];
+
+  function renderHKDSEList() {
+    var list = document.getElementById('hkdse-list');
+    if (!list) return;
+    var html = '';
+    for (var i = 0; i < EXAMPLES.length; i++) {
+      var ex = EXAMPLES[i];
+      html += '<div class="example-card" data-idx="' + i + '">';
+      html += '<div class="example-num">EXAMPLE ' + ex.n + ' — ' + ex.title + '</div>';
+      html += '<div class="example-q">' + ex.q + '</div>';
+      html += '</div>';
+    }
+    list.innerHTML = html;
+    var cards = list.querySelectorAll('.example-card');
+    for (var j = 0; j < cards.length; j++) {
+      (function(idx) {
+        cards[idx].onclick = function() { loadExample(idx); };
+      })(j);
+    }
+  }
+
+  function loadExample(idx) {
+    var ex = EXAMPLES[idx];
+    if (!ex) return;
+    if (A) A.value = ex.a;
+    if (B) B.value = ex.b;
+    if (C) C.value = ex.c;
+    var sol = document.getElementById('hkdse-solution');
+    if (!sol) return;
+    sol.style.display = 'block';
+    var html = '<div style="font-size:1.1em;margin-bottom:8px;"><b>Example ' + ex.n + ':</b> ' + ex.q + '</div>';
+    html += '<div style="margin-bottom:8px;color:#ccc;">Corresponding form: <b>' + ex.a + 'x\u00B2 + (' + ex.b + ')x + (' + ex.c + ') = 0</b></div>';
+    for (var s = 0; s < ex.steps.length; s++) {
+      html += '<div><span class="step">Step ' + (s+1) + '</span>' + ex.steps[s] + '</div>';
+    }
+    sol.innerHTML = html;
+    sol.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    compute();
+  }
+
+  bind(A, compute);
+  bind(B, compute);
+  bind(C, compute);
+  if (window.addEventListener) window.addEventListener('resize', drawGraph);
+  else window.attachEvent('onresize', drawGraph);
+
+  renderHKDSEList();
+  compute();
+})();
+</script>
+</body>
+</html>
