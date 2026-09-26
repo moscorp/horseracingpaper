@@ -9,7 +9,7 @@ $API_SECRET = '87e5450b-a617-42e9-b446-e523e08ebcbe'; // shared secret
 $db_host = 'localhost';      // often localhost on shared hosting
 $db_name = 'fengrmkw_moosay';
 $db_user = 'fengrmkw_melvin';
-$db_pass = 'mopass.24626388';
+$db_pass = 'YOUR_DB_PASSWORD';
 
 // Simple token check (GET ?token=...)
 $token = $_GET['token'] ?? '';

@@ -8,7 +8,7 @@ $dbConfig = [
     'host' => 'localhost',
     'name' => 'fengrmkw_moosay',
     'user' => 'fengrmkw_melvin',
-    'pass' => 'mopass.24626388'
+    'pass' => 'YOUR_DB_PASSWORD'
 ];
 
 

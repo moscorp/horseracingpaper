@@ -12,6 +12,10 @@ Chinese-first racing site for **buycarl.com** (WordPress CMS shell, no store).
 
 ## Status
 
-Legacy `/00` imported (slim source in `legacy/00-slim/`, ~387 PHP files). Full FTP extract kept local-only (gitignored).
+- Legacy `/00` in `legacy/00-slim/` (~387 PHP files)
+- Plugin v0.2: dense race-day UI wired to `hkracing_*` via `$wpdb`
+- Blog priority thresholds editable in WP admin（強烈/留意/配腳）
+- Deploy: Actions → **Deploy theme & plugin to Namecheap**
+- Activation steps: [docs/ACTIVATION.md](./docs/ACTIVATION.md)
 
-Deploy target: Namecheap `/home/fengrmkw/buycarl.com` via GitHub Actions FTP (secrets already configured).
+**Do not activate theme/plugin until after a successful deploy.**

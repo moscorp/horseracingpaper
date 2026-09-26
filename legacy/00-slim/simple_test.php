@@ -6,7 +6,7 @@ $dbConfig = [
     'host' => 'localhost',
     'name' => 'fengrmkw_moosay',
     'user' => 'fengrmkw_melvin', // 替换为您的真实信息
-    'pass' => 'mopass.24626388'
+    'pass' => 'YOUR_DB_PASSWORD'
 ];
 
 try {

@@ -13,7 +13,7 @@ $dbConfig = [
     'host' => 'localhost',
     'name' => 'fengrmkw_moosay',
     'user' => 'fengrmkw_melvin',
-    'pass' => 'mopass.24626388'
+    'pass' => 'YOUR_DB_PASSWORD'
 ];
 
 // 设置 JSON 编码选项：不转义 Unicode，输出原始中文

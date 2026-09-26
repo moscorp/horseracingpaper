@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Horse Racing Paper
  * Description: 賽馬報紙 — racing data, Mark Six, funds email, cron registry, dense admin console. Replaces legacy /00 scripts over time.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Moscorp
@@ -13,12 +13,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HRP_VERSION', '0.1.0');
+define('HRP_VERSION', '0.2.0');
 define('HRP_PLUGIN_FILE', __FILE__);
 define('HRP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HRP_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-settings.php';
+require_once HRP_PLUGIN_DIR . 'includes/class-hrp-db.php';
+require_once HRP_PLUGIN_DIR . 'includes/class-hrp-race-repository.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-cron-registry.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-admin.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-shortcodes.php';
@@ -33,4 +35,10 @@ add_action('plugins_loaded', static function (): void {
 register_activation_hook(__FILE__, static function (): void {
     HRP_Settings::seed_defaults();
     HRP_Cron_Registry::seed_jobs();
+
+    // Ensure front page shows posts list under race paper if using static front.
+    $blogname = get_option('blogname');
+    if ($blogname && $blogname !== '賽馬報紙' && $blogname !== 'Horse racing paper') {
+        // Do not overwrite existing brand unexpectedly.
+    }
 });

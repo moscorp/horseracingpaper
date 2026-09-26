@@ -4,7 +4,7 @@ include_once ("lib/func_mailer_gmail.php");
 include_once ("lib/constants.php");
 $mysqli = mysqli_connect(DB_HOSTwp, DB_USERwp, DB_PASSwp, DB_NAMEwp);
 
-// $mysqli = mysqli_connect("localhost", "innomtzv_melvin", "mopass.24626388", "innomtzv_moosay");
+// $mysqli = mysqli_connect("localhost", "innomtzv_melvin", "YOUR_DB_PASSWORD", "innomtzv_moosay");
 /**
  * Convert a number to its circled Unicode representation.
  *

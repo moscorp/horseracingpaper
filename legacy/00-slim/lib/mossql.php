@@ -3,13 +3,13 @@
 	include_once "ez_sql_mysqli.php";
 
 // 	define("db_user", "innomtzv_melvin");			// <-- mysql db user
-// 	define("db_password", "mopass.24626388");		// <-- mysql db password
+// 	define("db_password", "YOUR_DB_PASSWORD");		// <-- mysql db password
 // 	define("db_name", "innomtzv_moosay");		// <-- mysql db pname
 // 	define("db_host", "localhost");	// <-- mysql server host
 	
 
 //     $dbuser = "innomtzv_melvin";
-//     $dbpassword = "mopass.24626388";
+//     $dbpassword = "YOUR_DB_PASSWORD";
 
 require_once("lib/constants.php");
 

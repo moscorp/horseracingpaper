@@ -1,6 +1,6 @@
 <?php
 /**
- * Editable constants / settings (no hard-coded magic numbers in scrapers).
+ * Editable constants / settings (no hard-coded magic numbers).
  *
  * @package Horse_Racing_Paper
  */
@@ -37,6 +37,10 @@ final class HRP_Settings
                 'category_review' => '賽後回顧',
                 'category_m6' => '六合彩',
                 'idempotent' => true,
+                // From legacy HKJC_blogpost.php display thresholds
+                'priority_hot' => 70,
+                'priority_watch' => 55,
+                'priority_place' => 40,
             ],
             'funds_email_to' => '',
             'dense_ui' => true,
@@ -46,15 +50,24 @@ final class HRP_Settings
     public static function seed_defaults(): void
     {
         if (get_option(self::OPTION_KEY) === false) {
-            $defaults = self::defaults();
-            // Keep generated secret only on first seed.
-            add_option(self::OPTION_KEY, $defaults, '', false);
+            add_option(self::OPTION_KEY, self::defaults(), '', false);
         }
     }
 
     public static function get(): array
     {
-        return wp_parse_args((array) get_option(self::OPTION_KEY, []), self::defaults());
+        $stored = (array) get_option(self::OPTION_KEY, []);
+        $defaults = self::defaults();
+        $merged = wp_parse_args($stored, $defaults);
+        $merged['score_weights'] = wp_parse_args(
+            (array) ($stored['score_weights'] ?? []),
+            $defaults['score_weights']
+        );
+        $merged['blog'] = wp_parse_args(
+            (array) ($stored['blog'] ?? []),
+            $defaults['blog']
+        );
+        return $merged;
     }
 
     public static function get_value(string $key, $default = null)
@@ -78,21 +91,29 @@ final class HRP_Settings
         $input = is_array($input) ? $input : [];
         $out = $current;
 
-        if (isset($input['site_title_zh'])) {
-            $out['site_title_zh'] = sanitize_text_field($input['site_title_zh']);
-        }
-        if (isset($input['cron_secret'])) {
-            $out['cron_secret'] = sanitize_text_field($input['cron_secret']);
-        }
-        if (isset($input['timezone'])) {
-            $out['timezone'] = sanitize_text_field($input['timezone']);
-        }
-        if (isset($input['funds_email_to'])) {
-            $out['funds_email_to'] = sanitize_text_field($input['funds_email_to']);
+        foreach (['site_title_zh', 'cron_secret', 'timezone', 'funds_email_to'] as $key) {
+            if (isset($input[$key])) {
+                $out[$key] = sanitize_text_field($input[$key]);
+            }
         }
         if (isset($input['score_weights']) && is_array($input['score_weights'])) {
             foreach ($input['score_weights'] as $k => $v) {
                 $out['score_weights'][sanitize_key($k)] = (float) $v;
+            }
+        }
+        if (isset($input['blog']) && is_array($input['blog'])) {
+            foreach (['category_racing', 'category_review', 'category_m6'] as $k) {
+                if (isset($input['blog'][$k])) {
+                    $out['blog'][$k] = sanitize_text_field($input['blog'][$k]);
+                }
+            }
+            foreach (['priority_hot', 'priority_watch', 'priority_place'] as $k) {
+                if (isset($input['blog'][$k])) {
+                    $out['blog'][$k] = (float) $input['blog'][$k];
+                }
+            }
+            if (isset($input['blog']['idempotent'])) {
+                $out['blog']['idempotent'] = !empty($input['blog']['idempotent']);
             }
         }
         return $out;

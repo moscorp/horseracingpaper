@@ -7,7 +7,7 @@ $dbConfig = [
     'host' => 'localhost',
     'name' => 'fengrmkw_moosay',
     'user' => 'fengrmkw_melvin',
-    'pass' => 'mopass.24626388'
+    'pass' => 'YOUR_DB_PASSWORD'
 ];
 
 echo "[" . date('Y-m-d H:i:s') . "] 开始初始化队列...\n";
