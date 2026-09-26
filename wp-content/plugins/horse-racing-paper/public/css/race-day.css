@@ -1,0 +1,156 @@
+/* Dense race-day paper — low padding, max rows visible */
+.hrp-dense {
+  --hrp-line: #2a3440;
+  --hrp-hot: #ffb4a8;
+  --hrp-watch: #ffe08a;
+  --hrp-place: #9fd4ff;
+  --hrp-low: #8b9aab;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.hrp-meeting-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.4rem;
+  color: #c5d0dc;
+}
+
+.hrp-meta-strong {
+  color: #c4a35a;
+  font-weight: 700;
+}
+
+.hrp-muted {
+  color: #8b9aab;
+}
+
+.hrp-race-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin: 0 0 0.4rem;
+}
+
+.hrp-race-tabs button {
+  appearance: none;
+  border: 1px solid #334155;
+  background: #1a222c;
+  color: #e8eef4;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.hrp-race-tabs button[aria-selected="true"] {
+  border-color: #c4a35a;
+  color: #c4a35a;
+  background: #241f14;
+}
+
+.hrp-race-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  margin: 0 0 0.25rem;
+  align-items: baseline;
+}
+
+.hrp-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--hrp-line);
+  background: rgba(15, 20, 25, 0.55);
+}
+
+.hrp-dense table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  min-width: 720px;
+}
+
+.hrp-dense th,
+.hrp-dense td {
+  padding: 0.15rem 0.3rem;
+  border-bottom: 1px solid var(--hrp-line);
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.hrp-dense th {
+  color: #8b9aab;
+  font-weight: 600;
+  background: #151b22;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.hrp-horse {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hrp-tag {
+  display: inline-block;
+  margin-left: 0.25rem;
+  padding: 0 0.25rem;
+  border: 1px solid #445;
+  color: #9fb0c3;
+  font-size: 10px;
+}
+
+.hrp-score {
+  font-weight: 700;
+}
+
+.hrp-tier-hot td:first-child,
+.hrp-tier-hot .hrp-score {
+  color: var(--hrp-hot);
+}
+
+.hrp-tier-watch .hrp-score {
+  color: var(--hrp-watch);
+}
+
+.hrp-tier-place .hrp-score {
+  color: var(--hrp-place);
+}
+
+.hrp-tier-low .hrp-score {
+  color: var(--hrp-low);
+}
+
+.hrp-legend {
+  margin: 0.45rem 0 0;
+  color: #8b9aab;
+  font-size: 11px;
+}
+
+.hrp-legend .hrp-tier-hot { color: var(--hrp-hot); }
+.hrp-legend .hrp-tier-watch { color: var(--hrp-watch); }
+.hrp-legend .hrp-tier-place { color: var(--hrp-place); }
+.hrp-legend .hrp-tier-low { color: var(--hrp-low); }
+
+.hrp-empty {
+  color: #8b9aab;
+  margin: 0.5rem 0;
+}
+
+.hrp-race-panel[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .hrp-dense {
+    font-size: 11px;
+  }
+  .hrp-dense th,
+  .hrp-dense td {
+    padding: 0.12rem 0.22rem;
+  }
+}

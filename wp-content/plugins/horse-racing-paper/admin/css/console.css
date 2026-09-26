@@ -1,0 +1,50 @@
+/* Dense admin console — low padding, more rows visible */
+.hrp-admin h1 {
+  margin: 0.4rem 0 0.6rem;
+  font-size: 1.25rem;
+}
+.hrp-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.hrp-admin-card {
+  background: #fff;
+  border: 1px solid #c3c4c7;
+  padding: 0.4rem 0.55rem;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.hrp-admin-card strong {
+  display: block;
+  color: #646970;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+.hrp-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #fff;
+}
+.hrp-admin-table th,
+.hrp-admin-table td {
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #dcdcde;
+  text-align: left;
+  vertical-align: top;
+}
+.hrp-admin-table thead th {
+  background: #f0f0f1;
+}
+.hrp-admin-table code {
+  font-size: 11px;
+}
+.hrp-admin .form-table th {
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  width: 140px;
+}
+.hrp-admin .form-table td {
+  padding: 0.25rem 0.5rem;
+}

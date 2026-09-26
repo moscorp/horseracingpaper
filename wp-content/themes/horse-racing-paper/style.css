@@ -1,0 +1,117 @@
+/*
+Theme Name: Horse Racing Paper
+Theme URI: https://buycarl.com/
+Author: Moscorp
+Description: 賽馬報紙 — Chinese-first dense racing frontpage (no storefront). Works with the Horse Racing Paper plugin.
+Version: 0.2.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+Text Domain: horse-racing-paper
+*/
+
+:root {
+  --hrp-bg: #0f1419;
+  --hrp-surface: #1a222c;
+  --hrp-text: #e8eef4;
+  --hrp-muted: #8b9aab;
+  --hrp-accent: #c4a35a;
+  --hrp-win: #3d9a6a;
+  --hrp-lose: #c45c5c;
+  --hrp-gap: 0.5rem;
+  --hrp-pad: 0.5rem 0.75rem;
+  --hrp-font-display: "Noto Serif TC", "Source Han Serif TC", serif;
+  --hrp-font-body: "Noto Sans TC", "Source Han Sans TC", sans-serif;
+  --hrp-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.hrp-theme {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #243044 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #2a2218 0%, transparent 50%),
+    var(--hrp-bg);
+  color: var(--hrp-text);
+  font-family: var(--hrp-font-body);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.hrp-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--hrp-pad);
+}
+
+.hrp-brand {
+  font-family: var(--hrp-font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--hrp-accent);
+  margin: 0;
+}
+
+.hrp-tagline {
+  color: var(--hrp-muted);
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.hrp-dense table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--hrp-font-mono);
+  font-size: 12px;
+}
+
+.hrp-dense th,
+.hrp-dense td {
+  padding: 0.2rem 0.35rem;
+  border-bottom: 1px solid #2a3440;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.hrp-dense th {
+  color: var(--hrp-muted);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  background: var(--hrp-surface);
+}
+
+.hrp-race-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.hrp-race-tabs button {
+  appearance: none;
+  border: 1px solid #334155;
+  background: var(--hrp-surface);
+  color: var(--hrp-text);
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.hrp-race-tabs button[aria-selected="true"] {
+  border-color: var(--hrp-accent);
+  color: var(--hrp-accent);
+}
+
+.hrp-section-title {
+  font-size: 0.95rem;
+  margin: 0.75rem 0 0.35rem;
+  font-weight: 600;
+}
