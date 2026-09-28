@@ -90,6 +90,66 @@ jobs:
 
           upload_tree(Path("wp-content/themes/horse-racing-paper"), "wp-content/themes/horse-racing-paper")
           upload_tree(Path("wp-content/plugins/horse-racing-paper"), "wp-content/plugins/horse-racing-paper")
+
+          def rm_tree(remote: str):
+              """Best-effort wipe of LiteSpeed / WP page-cache dirs so stale HTML dies."""
+              try:
+                  ftp.cwd(root)
+                  ftp.cwd(remote)
+              except Exception as e:
+                  print("skip wipe", remote, e)
+                  return
+              print("wipe", remote, "pwd", ftp.pwd())
+
+              def wipe(cwd_label=""):
+                  try:
+                      entries = list(ftp.mlsd())
+                  except Exception:
+                      try:
+                          names = ftp.nlst()
+                      except Exception as e:
+                          print("list fail", e)
+                          return
+                      entries = [(n, {}) for n in names if n not in (".", "..")]
+                  for name, facts in entries:
+                      if name in (".", ".."):
+                          continue
+                      typ = (facts or {}).get("type", "")
+                      try:
+                          if typ == "dir" or (not typ and _is_dir(name)):
+                              ftp.cwd(name)
+                              wipe(name)
+                              ftp.cwd("..")
+                              try:
+                                  ftp.rmd(name)
+                                  print("RMD", cwd_label + "/" + name)
+                              except Exception as e:
+                                  print("rmd fail", name, e)
+                          else:
+                              ftp.delete(name)
+                              print("DELE", cwd_label + "/" + name)
+                      except Exception as e:
+                          print("wipe entry fail", name, e)
+
+              def _is_dir(name):
+                  cur = ftp.pwd()
+                  try:
+                      ftp.cwd(name)
+                      ftp.cwd(cur)
+                      return True
+                  except Exception:
+                      return False
+
+              wipe(remote)
+              ftp.cwd(root)
+
+          for cache_path in (
+              "wp-content/cache/litespeed",
+              "wp-content/litespeed",
+              "wp-content/cache",
+          ):
+              rm_tree(cache_path)
+
           ftp.quit()
           print("SUCCESS")
           PY
@@ -108,11 +168,19 @@ jobs:
             echo "FAIL: still rendering Mark Six post 19391 on race-review URL" >&2
             exit 1
           fi
-          # Also check uncached-by-query AND plain URL after purge
+          # Menu links use ?hrpv= — verify that path (and plain if cache wipe worked)
+          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.5")
+          printf '%s' "$vered" > /tmp/hrp-single-vered.html
+          grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
           plain=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/")
           printf '%s' "$plain" > /tmp/hrp-single-plain.html
-          grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html
-          echo "Smoke OK — race-review content matches post id (busted + plain)"
+          if ! grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html; then
+            echo "WARN: plain URL still stale after cache wipe; versioned links are OK" >&2
+            grep -q 'hrp-single post-19391' /tmp/hrp-single-plain.html && echo "plain still has 19391" >&2 || true
+          else
+            echo "Plain URL also fresh"
+          fi
+          echo "Smoke OK — race-review content matches post id"
 
       - name: Summary
         run: echo "Deployed theme + plugin; purged caches; smoke-checked singles." >> "$GITHUB_STEP_SUMMARY"

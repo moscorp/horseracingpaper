@@ -87,6 +87,35 @@ add_action('send_headers', static function (): void {
     }
 }, 0);
 
+/**
+ * Append theme version to content links so LiteSpeed/CDN cannot keep serving
+ * pre-fix HTML for the same pretty permalink.
+ */
+function hrp_link_cache_bust(string $url): string
+{
+    if ($url === '' || strpos($url, 'hrpv=') !== false) {
+        return $url;
+    }
+    $ver = (string) (wp_get_theme()->get('Version') ?: '0');
+    return add_query_arg('hrpv', $ver, $url);
+}
+
+add_filter('post_link', static function ($url) {
+    return hrp_link_cache_bust((string) $url);
+}, 99);
+add_filter('page_link', static function ($url) {
+    return hrp_link_cache_bust((string) $url);
+}, 99);
+add_filter('post_type_link', static function ($url) {
+    return hrp_link_cache_bust((string) $url);
+}, 99);
+add_filter('term_link', static function ($url) {
+    return hrp_link_cache_bust((string) $url);
+}, 99);
+add_filter('year_link', 'hrp_link_cache_bust', 99);
+add_filter('month_link', 'hrp_link_cache_bust', 99);
+add_filter('day_link', 'hrp_link_cache_bust', 99);
+
 add_action('wp_enqueue_scripts', static function (): void {
     wp_enqueue_style(
         'hrp-fonts',
