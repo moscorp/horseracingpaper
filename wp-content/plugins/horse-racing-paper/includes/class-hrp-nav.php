@@ -84,8 +84,9 @@ final class HRP_Nav
                     'order' => 'DESC',
                     'no_found_rows' => true,
                 ]);
-                $posts = $q->posts;
-                wp_reset_postdata();
+                // Read posts without advancing the main loop / global $post.
+                $posts = is_array($q->posts) ? $q->posts : [];
+                unset($q);
             }
             $out[] = [
                 'key' => $def['key'],
@@ -138,8 +139,8 @@ final class HRP_Nav
         }
 
         $q = new WP_Query($args);
-        $posts = $q->posts;
-        wp_reset_postdata();
+        $posts = is_array($q->posts) ? $q->posts : [];
+        unset($q);
         return $posts;
     }
 

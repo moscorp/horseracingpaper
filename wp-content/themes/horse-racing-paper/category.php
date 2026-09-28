@@ -1,6 +1,6 @@
 <?php
 /**
- * Category archive — used by sidebar「更多」.
+ * Category archive — used by sidebar「更多」/ group title links.
  *
  * @package Horse_Racing_Paper
  */
@@ -18,13 +18,13 @@ $term = get_queried_object();
             <article class="mb-2 border-b border-ink-line py-2">
                 <a class="text-sm text-paper hover:text-brass" href="<?php the_permalink(); ?>">
                     <?php the_title(); ?>
-                    <span class="ml-2 text-[11px] text-paper-mute"><?php echo esc_html(get_the_date('Y-m-d H:i')); ?></span>
+                    <span class="ml-2 text-[11px] text-paper-dim"><?php echo esc_html(get_the_date('Y-m-d H:i')); ?></span>
                 </a>
             </article>
         <?php endwhile; ?>
-            <div class="mt-3 text-sm text-paper-mute"><?php the_posts_pagination(); ?></div>
+            <div class="mt-3 text-sm text-paper-dim"><?php the_posts_pagination(); ?></div>
         <?php else : ?>
-            <p class="text-paper-mute">此分類尚無文章。</p>
+            <p class="text-paper-dim">此分類尚無文章。</p>
         <?php endif; ?>
     </main>
 </div>

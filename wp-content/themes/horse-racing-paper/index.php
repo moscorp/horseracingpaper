@@ -13,13 +13,13 @@ get_header();
         <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
             <article class="mb-3 border-b border-ink-line pb-3">
                 <h1 class="m-0 text-sm font-semibold">
-                    <a class="hover:text-brass" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                    <a class="text-paper hover:text-brass" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                 </h1>
-                <p class="mt-1 text-[11px] text-paper-mute"><?php echo esc_html(get_the_date('Y-m-d H:i')); ?></p>
-                <div class="mt-1 text-[13px] text-paper-soft"><?php the_excerpt(); ?></div>
+                <p class="mt-1 text-[11px] text-paper-dim"><?php echo esc_html(get_the_date('Y-m-d H:i')); ?></p>
+                <div class="mt-1 text-[14px] text-paper"><?php the_excerpt(); ?></div>
             </article>
         <?php endwhile; else : ?>
-            <p class="text-paper-mute">沒有內容。</p>
+            <p class="text-paper-dim">沒有內容。</p>
         <?php endif; ?>
     </main>
 </div>

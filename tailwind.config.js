@@ -17,19 +17,20 @@ module.exports = {
           edge: '#334155',
         },
         paper: {
-          DEFAULT: '#e8eef4',
-          mute: '#8b9aab',
-          soft: '#c5d0dc',
+          DEFAULT: '#f3f6fa',
+          soft: '#e4ebf3',
+          dim: '#b7c4d4',
+          mute: '#b7c4d4',
         },
         brass: {
-          DEFAULT: '#c4a35a',
+          DEFAULT: '#d4b26a',
           dim: '#241f14',
         },
         signal: {
           hot: '#ffb4a8',
           watch: '#ffe08a',
           place: '#9fd4ff',
-          low: '#8b9aab',
+          low: '#b7c4d4',
         },
       },
       fontFamily: {

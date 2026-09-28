@@ -1,24 +1,30 @@
 (function () {
   'use strict';
 
+  function setExpanded(btn, next) {
+    btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+    var caret = btn.querySelector('[data-nav-caret]');
+    if (caret) {
+      caret.textContent = next ? '−' : '+';
+    }
+    var group = btn.closest('[data-nav-group]');
+    var panel = group ? group.querySelector('.hrp-nav-panel') : null;
+    if (panel) {
+      if (next) {
+        panel.removeAttribute('hidden');
+      } else {
+        panel.setAttribute('hidden', '');
+      }
+    }
+  }
+
   function initNav(root) {
     root.querySelectorAll('[data-nav-toggle]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         var expanded = btn.getAttribute('aria-expanded') === 'true';
-        var next = !expanded;
-        btn.setAttribute('aria-expanded', next ? 'true' : 'false');
-        var caret = btn.querySelector('[data-nav-caret]');
-        if (caret) {
-          caret.textContent = next ? '−' : '+';
-        }
-        var panel = btn.nextElementSibling;
-        if (panel && panel.classList.contains('hrp-nav-panel')) {
-          if (next) {
-            panel.removeAttribute('hidden');
-          } else {
-            panel.setAttribute('hidden', '');
-          }
-        }
+        setExpanded(btn, !expanded);
       });
     });
 

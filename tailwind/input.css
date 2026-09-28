@@ -25,7 +25,7 @@
   }
 
   .hrp-sidebar {
-    @apply w-full shrink-0 border border-ink-line bg-ink-mid/70 md:w-56 lg:w-64;
+    @apply w-full shrink-0 border border-ink-line bg-ink-mid/80 md:w-56 lg:w-64;
   }
 
   .hrp-main {
@@ -36,12 +36,26 @@
     @apply border-t border-ink-line;
   }
 
-  .hrp-nav-toggle {
-    @apply flex w-full items-center justify-between gap-2 px-2.5 py-2 text-left text-xs font-semibold text-brass;
+  .hrp-nav-heading {
+    @apply flex items-stretch;
   }
 
-  .hrp-nav-toggle[aria-expanded='false'] + .hrp-nav-panel {
+  .hrp-nav-title {
+    @apply flex flex-1 items-center px-2.5 py-2 text-left text-xs font-semibold text-brass hover:underline;
+  }
+
+  .hrp-nav-toggle {
+    @apply flex w-9 shrink-0 items-center justify-center border-l border-ink-line text-base font-semibold text-paper-soft hover:bg-ink-soft hover:text-brass;
+  }
+
+  .hrp-nav-toggle[aria-expanded='false'] + .hrp-nav-panel,
+  .hrp-nav-heading + .hrp-nav-panel[hidden] {
     @apply hidden;
+  }
+
+  /* Keep panel hidden when aria says collapsed (toggle is no longer a direct sibling). */
+  .hrp-nav-group:has(.hrp-nav-toggle[aria-expanded='false']) .hrp-nav-panel {
+    display: none !important;
   }
 
   .hrp-nav-list {
@@ -57,7 +71,7 @@
   }
 
   .hrp-nav-meta {
-    @apply mt-0.5 block text-[10px] text-paper-mute;
+    @apply mt-0.5 block text-[11px] text-paper-dim;
   }
 
   .hrp-nav-more {
@@ -69,7 +83,7 @@
   }
 
   .hrp-footer-inner {
-    @apply mx-auto flex max-w-shell flex-col gap-2 px-3 py-4 text-[12px] text-paper-mute md:flex-row md:items-center md:justify-between;
+    @apply mx-auto flex max-w-shell flex-col gap-2 px-3 py-4 text-[12px] text-paper-dim md:flex-row md:items-center md:justify-between;
   }
 
   .hrp-footer a {
@@ -89,6 +103,59 @@
   }
 
   .hrp-brand-sub {
-    @apply m-0 text-xs text-paper-mute md:text-sm;
+    @apply m-0 text-xs text-paper-dim md:text-sm;
+  }
+
+  /* Post HTML often ships light tables / gray text — force readable contrast. */
+  .hrp-content {
+    @apply text-paper;
+  }
+
+  .hrp-content h1,
+  .hrp-content h2,
+  .hrp-content h3,
+  .hrp-content h4,
+  .hrp-content strong,
+  .hrp-content b {
+    @apply text-paper;
+  }
+
+  .hrp-content a {
+    @apply text-brass underline;
+  }
+
+  .hrp-content p,
+  .hrp-content li,
+  .hrp-content td,
+  .hrp-content th,
+  .hrp-content span,
+  .hrp-content div {
+    color: inherit;
+  }
+
+  .hrp-content table {
+    @apply w-full border-collapse text-[13px] text-paper;
+    background: rgba(15, 20, 25, 0.65) !important;
+  }
+
+  .hrp-content th,
+  .hrp-content td {
+    @apply border border-ink-line px-2 py-1 text-left;
+    color: #f3f6fa !important;
+    background: transparent !important;
+  }
+
+  .hrp-content th {
+    @apply bg-ink-soft font-semibold;
+    background: #151b22 !important;
+    color: #e4ebf3 !important;
+  }
+
+  .hrp-content tr:nth-child(even) td {
+    background: rgba(26, 34, 44, 0.55) !important;
+  }
+
+  .hrp-content img {
+    @apply max-w-full h-auto;
   }
 }
