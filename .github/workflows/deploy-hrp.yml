@@ -101,13 +101,18 @@ jobs:
           curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
           # Spot-check a race-review URL that was previously stuck on wrong cached HTML
           html=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?t=$(date +%s)")
-          echo "$html" | grep -q 'hrp-single post-19372'
-          echo "$html" | grep -q '賽後回顧'
-          if echo "$html" | grep -q 'hrp-single post-19391'; then
+          printf '%s' "$html" > /tmp/hrp-single-smoke.html
+          grep -q 'hrp-single post-19372' /tmp/hrp-single-smoke.html
+          grep -q '賽後回顧' /tmp/hrp-single-smoke.html
+          if grep -q 'hrp-single post-19391' /tmp/hrp-single-smoke.html; then
             echo "FAIL: still rendering Mark Six post 19391 on race-review URL" >&2
             exit 1
           fi
-          echo "Smoke OK — race-review content matches post id"
+          # Also check uncached-by-query AND plain URL after purge
+          plain=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/")
+          printf '%s' "$plain" > /tmp/hrp-single-plain.html
+          grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html
+          echo "Smoke OK — race-review content matches post id (busted + plain)"
 
       - name: Summary
         run: echo "Deployed theme + plugin; purged caches; smoke-checked singles." >> "$GITHUB_STEP_SUMMARY"
