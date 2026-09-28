@@ -150,6 +150,43 @@ jobs:
           ):
               rm_tree(cache_path)
 
+          # Prepend .htaccess 302 → ?hrpv= so plain pretty URLs bypass stale LS public cache.
+          HRP_VER = "0.3.6"
+          HRP_BLOCK_BEGIN = "# BEGIN HRP Cache Bust"
+          HRP_BLOCK_END = "# END HRP Cache Bust"
+          HRP_BLOCK = f"""{HRP_BLOCK_BEGIN}
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{{REQUEST_METHOD}} GET [NC]
+RewriteCond %{{QUERY_STRING}} !(^|&)hrpv=
+RewriteCond %{{REQUEST_URI}} !^/wp-(admin|content|includes|json|cron) [NC]
+RewriteCond %{{REQUEST_URI}} !^/(xmlrpc\\.php|favicon\\.ico) [NC]
+RewriteCond %{{REQUEST_URI}} !\\.(css|js|mjs|map|jpe?g|png|gif|webp|ico|svg|woff2?|ttf|eot|txt|xml|pdf|zip|gz)$ [NC]
+RewriteRule ^(.*)$ /$1?hrpv={HRP_VER} [R=302,L,QSA]
+</IfModule>
+{HRP_BLOCK_END}
+"""
+          import io, re
+          ftp.cwd(root)
+          existing = ""
+          try:
+              buf = io.BytesIO()
+              ftp.retrbinary("RETR .htaccess", buf.write)
+              existing = buf.getvalue().decode("utf-8", "replace")
+              print("loaded .htaccess bytes", len(existing))
+          except Exception as e:
+              print("no existing .htaccess", e)
+
+          if HRP_BLOCK_BEGIN in existing:
+              existing = re.sub(
+                  re.escape(HRP_BLOCK_BEGIN) + r"[\s\S]*?" + re.escape(HRP_BLOCK_END) + r"\n?",
+                  "",
+                  existing,
+              )
+          new_ht = HRP_BLOCK + "\n" + existing.lstrip("\n")
+          ftp.storbinary("STOR .htaccess", io.BytesIO(new_ht.encode("utf-8")))
+          print("wrote .htaccess with HRP cache-bust redirect")
+
           ftp.quit()
           print("SUCCESS")
           PY
@@ -169,7 +206,7 @@ jobs:
           cat /tmp/hrp-purge-out.txt || true
           curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
           # Menu links use ?hrpv=
-          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.5")
+          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.6")
           printf '%s' "$vered" > /tmp/hrp-single-vered.html
           grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
           grep -q '賽後回顧' /tmp/hrp-single-vered.html
@@ -177,14 +214,12 @@ jobs:
             echo "FAIL: versioned URL still wrong" >&2
             exit 1
           fi
-          plain=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/")
-          printf '%s' "$plain" > /tmp/hrp-single-plain.html
-          if grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html; then
-            echo "Plain URL also fresh"
-          else
-            echo "WARN: plain URL still stale; sidebar ?hrpv= links are correct" >&2
-          fi
-          echo "Smoke OK — versioned race-review content matches post id"
+          # Plain URL should 302 → ?hrpv=0.3.6 (htaccess) then show correct post
+          plain_code=$(curl -sS -o /tmp/hrp-plain-body.html -w '%{http_code}' -A 'HRP-Deploy/1.0' \
+            -L "https://buycarl.com/race-review-2026-09-23-happyvalley/")
+          echo "plain follow-redirects http=$plain_code"
+          grep -q 'hrp-single post-19372' /tmp/hrp-plain-body.html
+          echo "Smoke OK — plain URL redirects to fresh race-review content"
 
       - name: Summary
         run: echo "Deployed theme + plugin; purged caches; smoke-checked singles." >> "$GITHUB_STEP_SUMMARY"

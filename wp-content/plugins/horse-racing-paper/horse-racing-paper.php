@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Horse Racing Paper
  * Description: 自由馬紙（Carl's Racing Paper）— racing data, Mark Six, funds email, cron registry, dense admin console. Replaces legacy /00 scripts over time.
- * Version: 0.3.5
+ * Version: 0.3.6
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Moscorp
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HRP_VERSION', '0.3.5');
+define('HRP_VERSION', '0.3.6');
 define('HRP_PLUGIN_FILE', __FILE__);
 define('HRP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HRP_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -25,6 +25,7 @@ require_once HRP_PLUGIN_DIR . 'includes/class-hrp-race-repository.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-cron-registry.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-pages.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-nav.php';
+require_once HRP_PLUGIN_DIR . 'includes/class-hrp-permalinks.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-admin.php';
 require_once HRP_PLUGIN_DIR . 'includes/class-hrp-shortcodes.php';
 
@@ -32,6 +33,7 @@ add_action('plugins_loaded', static function (): void {
     HRP_Settings::init();
     HRP_Cron_Registry::init();
     HRP_Pages::init();
+    HRP_Permalinks::init();
     HRP_Admin::init();
     HRP_Shortcodes::init();
 
