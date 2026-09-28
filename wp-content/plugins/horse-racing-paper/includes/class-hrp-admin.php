@@ -128,10 +128,11 @@ final class HRP_Admin
         echo '</div></div>';
 
         echo '<div class="hrp-section-head">側欄分類（階層選單）</div>';
-        echo '<div class="hrp-field-row"><div class="hrp-field-label">賽事結果</div><div><input name="' . esc_attr($key) . '[blog][category_racing_result]" value="' . esc_attr($s['blog']['category_racing_result']) . '" class="regular-text"><p class="description">分類名稱或 slug</p></div></div>';
-        echo '<div class="hrp-field-row"><div class="hrp-field-label">賽事分析</div><div><input name="' . esc_attr($key) . '[blog][category_racing_analysis]" value="' . esc_attr($s['blog']['category_racing_analysis']) . '" class="regular-text"></div></div>';
-        echo '<div class="hrp-field-row"><div class="hrp-field-label">六合彩結果</div><div><input name="' . esc_attr($key) . '[blog][category_m6_result]" value="' . esc_attr($s['blog']['category_m6_result']) . '" class="regular-text"></div></div>';
-        echo '<div class="hrp-field-row"><div class="hrp-field-label">六合彩分析</div><div><input name="' . esc_attr($key) . '[blog][category_m6_analysis]" value="' . esc_attr($s['blog']['category_m6_analysis']) . '" class="regular-text"></div></div>';
+        echo '<p class="description">填 WordPress 分類 <strong>slug</strong> 或名稱。站上現用：<code>race-review</code>、<code>racing-news</code>、<code>mark-six-analysis</code>、<code>mark-six-prediction</code>。</p>';
+        echo '<div class="hrp-field-row"><div class="hrp-field-label">賽事結果</div><div><input name="' . esc_attr($key) . '[blog][category_racing_result]" value="' . esc_attr($s['blog']['category_racing_result']) . '" class="regular-text"><p class="description">預設 race-review（賽後回顧）</p></div></div>';
+        echo '<div class="hrp-field-row"><div class="hrp-field-label">賽事分析</div><div><input name="' . esc_attr($key) . '[blog][category_racing_analysis]" value="' . esc_attr($s['blog']['category_racing_analysis']) . '" class="regular-text"><p class="description">預設 racing-news</p></div></div>';
+        echo '<div class="hrp-field-row"><div class="hrp-field-label">六合彩結果</div><div><input name="' . esc_attr($key) . '[blog][category_m6_result]" value="' . esc_attr($s['blog']['category_m6_result']) . '" class="regular-text"><p class="description">預設 mark-six-analysis（賽後分析）</p></div></div>';
+        echo '<div class="hrp-field-row"><div class="hrp-field-label">六合彩分析</div><div><input name="' . esc_attr($key) . '[blog][category_m6_analysis]" value="' . esc_attr($s['blog']['category_m6_analysis']) . '" class="regular-text"><p class="description">預設 mark-six-prediction（預測）</p></div></div>';
         echo '<div class="hrp-field-row"><div class="hrp-field-label">每組顯示</div><div><input type="number" min="1" max="24" name="' . esc_attr($key) . '[blog][nav_limit]" value="' . esc_attr((string) $s['blog']['nav_limit']) . '"> <span class="description">預設 6；「更多」可展開下一組</span></div></div>';
 
         echo '<div class="hrp-section-head">頁腳內容（關於 / 私隱 / 條款）</div>';

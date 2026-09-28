@@ -36,14 +36,15 @@ final class HRP_Settings
                 'jockey' => 10,
             ],
             'blog' => [
-                'category_racing_result' => '賽事結果',
-                'category_racing_analysis' => '賽事分析',
-                'category_m6_result' => '六合彩結果',
-                'category_m6_analysis' => '六合彩分析',
+                // Live buycarl.com slugs (legacy cron publishers).
+                'category_racing_result' => 'race-review',
+                'category_racing_analysis' => 'racing-news',
+                'category_m6_result' => 'mark-six-analysis',
+                'category_m6_analysis' => 'mark-six-prediction',
                 // Legacy aliases kept for older scripts
-                'category_racing' => '賽事分析',
-                'category_review' => '賽後回顧',
-                'category_m6' => '六合彩',
+                'category_racing' => 'racing-news',
+                'category_review' => 'race-review',
+                'category_m6' => 'mark-six-prediction',
                 'idempotent' => true,
                 'priority_hot' => 70,
                 'priority_watch' => 55,
