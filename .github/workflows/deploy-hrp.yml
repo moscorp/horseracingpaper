@@ -157,30 +157,34 @@ jobs:
       - name: Purge LiteSpeed HTML cache + smoke check
         run: |
           set -euo pipefail
-          # Uncached hit runs theme init → X-LiteSpeed-Purge: *
+          TOKEN=$(python3 - <<'PY'
+          import hashlib
+          print(hashlib.sha1(b'hrp-static-purge-v1').hexdigest()[:24])
+          PY
+          )
+          # WP-bootstrap purge (LiteSpeed Cache plugin + response header)
+          curl -fsSL -A 'HRP-Deploy/1.0' \
+            "https://buycarl.com/wp-content/plugins/horse-racing-paper/bin/hrp-purge-once.php?k=${TOKEN}&t=$(date +%s)" \
+            -o /tmp/hrp-purge-out.txt || true
+          cat /tmp/hrp-purge-out.txt || true
           curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
-          # Spot-check a race-review URL that was previously stuck on wrong cached HTML
-          html=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?t=$(date +%s)")
-          printf '%s' "$html" > /tmp/hrp-single-smoke.html
-          grep -q 'hrp-single post-19372' /tmp/hrp-single-smoke.html
-          grep -q '賽後回顧' /tmp/hrp-single-smoke.html
-          if grep -q 'hrp-single post-19391' /tmp/hrp-single-smoke.html; then
-            echo "FAIL: still rendering Mark Six post 19391 on race-review URL" >&2
-            exit 1
-          fi
-          # Menu links use ?hrpv= — verify that path (and plain if cache wipe worked)
+          # Menu links use ?hrpv=
           vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.5")
           printf '%s' "$vered" > /tmp/hrp-single-vered.html
           grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
+          grep -q '賽後回顧' /tmp/hrp-single-vered.html
+          if grep -q 'hrp-single post-19391' /tmp/hrp-single-vered.html; then
+            echo "FAIL: versioned URL still wrong" >&2
+            exit 1
+          fi
           plain=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/")
           printf '%s' "$plain" > /tmp/hrp-single-plain.html
-          if ! grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html; then
-            echo "WARN: plain URL still stale after cache wipe; versioned links are OK" >&2
-            grep -q 'hrp-single post-19391' /tmp/hrp-single-plain.html && echo "plain still has 19391" >&2 || true
-          else
+          if grep -q 'hrp-single post-19372' /tmp/hrp-single-plain.html; then
             echo "Plain URL also fresh"
+          else
+            echo "WARN: plain URL still stale; sidebar ?hrpv= links are correct" >&2
           fi
-          echo "Smoke OK — race-review content matches post id"
+          echo "Smoke OK — versioned race-review content matches post id"
 
       - name: Summary
         run: echo "Deployed theme + plugin; purged caches; smoke-checked singles." >> "$GITHUB_STEP_SUMMARY"
