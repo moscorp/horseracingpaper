@@ -1,7 +1,7 @@
 <?php
 /**
- * Left hierarchical menu — native <details> so expand/collapse works without JS.
- * Never assign to $post (main-query global).
+ * Left hierarchical menu — native <details> accordion.
+ * Summary row toggles open/close; archive is a separate small link.
  *
  * @package Horse_Racing_Paper
  */
@@ -19,17 +19,17 @@ $groups = class_exists('HRP_Nav') ? HRP_Nav::groups() : [];
             $limit = (int) ($group['limit'] ?? 6);
             $nav_posts = $group['posts'] ?? [];
             $archive = !empty($group['archive']) ? (string) $group['archive'] : '';
+            // Only the first group starts open; user can collapse it via the caret.
             $open = $index === 0;
             ?>
             <details class="hrp-nav-group" data-nav-group="<?php echo esc_attr($group['key']); ?>"<?php echo $open ? ' open' : ''; ?>>
                 <summary class="hrp-nav-heading">
-                    <?php if ($archive !== '') : ?>
-                        <a class="hrp-nav-title" href="<?php echo esc_url($archive); ?>">
-                            <?php echo esc_html($group['label']); ?>
-                        </a>
-                    <?php else : ?>
-                        <span class="hrp-nav-title"><?php echo esc_html($group['label']); ?></span>
-                    <?php endif; ?>
+                    <span class="hrp-nav-title">
+                        <?php echo esc_html($group['label']); ?>
+                        <?php if ($archive !== '') : ?>
+                            <a class="hrp-nav-archive" href="<?php echo esc_url($archive); ?>" data-nav-archive>全部</a>
+                        <?php endif; ?>
+                    </span>
                     <span class="hrp-nav-caret" aria-hidden="true"></span>
                 </summary>
                 <div class="hrp-nav-panel">

@@ -195,7 +195,7 @@ jobs:
           cat /tmp/hrp-purge-out.txt || true
           curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
           # Menu links use ?hrpv=
-          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.6")
+          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.7")
           printf '%s' "$vered" > /tmp/hrp-single-vered.html
           grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
           grep -q '賽後回顧' /tmp/hrp-single-vered.html
@@ -203,7 +203,6 @@ jobs:
             echo "FAIL: versioned URL still wrong" >&2
             exit 1
           fi
-          # Plain URL should 302 → ?hrpv=0.3.6 (htaccess) then show correct post
           plain_code=$(curl -sS -o /tmp/hrp-plain-body.html -w '%{http_code}' -A 'HRP-Deploy/1.0' \
             -L "https://buycarl.com/race-review-2026-09-23-happyvalley/")
           echo "plain follow-redirects http=$plain_code"

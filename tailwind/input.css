@@ -49,16 +49,20 @@
   }
 
   .hrp-nav-title {
-    @apply flex flex-1 items-center px-2.5 py-2 text-left text-xs font-semibold text-brass hover:underline;
+    @apply flex flex-1 items-center gap-2 px-2.5 py-2 text-left text-xs font-semibold text-brass;
+  }
+
+  .hrp-nav-archive {
+    @apply text-[10px] font-normal text-paper-dim underline hover:text-brass;
   }
 
   .hrp-nav-caret {
-    @apply relative flex w-9 shrink-0 items-center justify-center border-l border-ink-line text-paper-soft;
+    @apply relative flex w-10 shrink-0 items-center justify-center border-l border-ink-line text-paper-soft hover:bg-ink-soft hover:text-brass;
   }
 
   .hrp-nav-caret::before {
     content: '+';
-    @apply text-base font-semibold;
+    @apply text-lg font-semibold leading-none;
   }
 
   .hrp-nav-group[open] > summary .hrp-nav-caret::before {
@@ -117,55 +121,142 @@
     @apply m-0 text-xs text-paper-dim md:text-sm;
   }
 
+  /*
+   * Post HTML (賽後回顧 / 賽事分析 / 預測) ships light cards + yellow rows.
+   * Never force light text onto those surfaces — that made fonts “invisible”.
+   */
   .hrp-content {
-    @apply text-paper;
+    color: #e8eef4;
+    line-height: 1.55;
+  }
+
+  .hrp-content > *:first-child {
+    margin-top: 0;
+  }
+
+  .hrp-content a {
+    color: #d4b26a !important;
+    text-decoration: underline;
   }
 
   .hrp-content h1,
   .hrp-content h2,
   .hrp-content h3,
-  .hrp-content h4,
-  .hrp-content strong,
-  .hrp-content b {
-    @apply text-paper;
+  .hrp-content h4 {
+    color: #f3f6fa;
   }
 
-  .hrp-content a {
-    @apply text-brass underline;
+  .hrp-content img {
+    height: auto;
+    max-width: 100%;
   }
 
-  .hrp-content p,
-  .hrp-content li,
-  .hrp-content td,
-  .hrp-content th,
-  .hrp-content span,
-  .hrp-content div {
-    color: inherit;
+  /*
+   * Light surfaces (inline #f…/#e…/#fff/white) inherit page paper text and go
+   * invisible. Set dark text on the painted element only — children keep their
+   * own inline accent colors (#667eea, #333, …) via normal cascade.
+   */
+  .hrp-content [style*='background: #f'],
+  .hrp-content [style*='background:#f'],
+  .hrp-content [style*='background: #e'],
+  .hrp-content [style*='background:#e'],
+  .hrp-content [style*='background: #d'],
+  .hrp-content [style*='background:#d'],
+  .hrp-content [style*='background: #c'],
+  .hrp-content [style*='background:#c'],
+  .hrp-content [style*='background: #F'],
+  .hrp-content [style*='background:#F'],
+  .hrp-content [style*='background: #E'],
+  .hrp-content [style*='background:#E'],
+  .hrp-content [style*='background: #C'],
+  .hrp-content [style*='background:#C'],
+  .hrp-content [style*='background: white'],
+  .hrp-content [style*='background:white'],
+  .hrp-content [style*='background-color: #f'],
+  .hrp-content [style*='background-color:#f'],
+  .hrp-content [style*='background-color: #e'],
+  .hrp-content [style*='background-color:#e'],
+  .hrp-content [style*='background-color: #F'],
+  .hrp-content [style*='background-color:#F'],
+  .hrp-content [style*='background-color: white'],
+  .hrp-content [style*='background-color:white'] {
+    color: #111827 !important;
+  }
+
+  /* Highlight rows: paint the cells so text is dark on yellow/pink/green */
+  .hrp-content tr[style*='background: #f'] > td,
+  .hrp-content tr[style*='background:#f'] > td,
+  .hrp-content tr[style*='background: #e'] > td,
+  .hrp-content tr[style*='background:#e'] > td,
+  .hrp-content tr[style*='background: #F'] > td,
+  .hrp-content tr[style*='background:#F'] > td,
+  .hrp-content tr[style*='background: #E'] > td,
+  .hrp-content tr[style*='background:#E'] > td {
+    color: #111827 !important;
+  }
+
+  /* Inline colors must beat the light-surface rule above (same !important tier). */
+  .hrp-content [style*='color: white'],
+  .hrp-content [style*='color:white'],
+  .hrp-content [style*='color: #fff'],
+  .hrp-content [style*='color:#fff'],
+  .hrp-content [style*='color: #FFF'],
+  .hrp-content [style*='color:#FFF'] {
+    color: #ffffff !important;
+  }
+
+  .hrp-content [style*='color: #FFD700'],
+  .hrp-content [style*='color:#FFD700'],
+  .hrp-content [style*='color: #ffd700'],
+  .hrp-content [style*='color:#ffd700'] {
+    color: #ffd700 !important;
+  }
+
+  .hrp-content [style*='color: #333'],
+  .hrp-content [style*='color:#333'] {
+    color: #333333 !important;
+  }
+
+  .hrp-content [style*='color: #666'],
+  .hrp-content [style*='color:#666'] {
+    color: #666666 !important;
+  }
+
+  .hrp-content [style*='color: #999'],
+  .hrp-content [style*='color:#999'] {
+    color: #999999 !important;
+  }
+
+  .hrp-content [style*='color: #667eea'],
+  .hrp-content [style*='color:#667eea'] {
+    color: #667eea !important;
+  }
+
+  .hrp-content [style*='color: #764ba2'],
+  .hrp-content [style*='color:#764ba2'] {
+    color: #764ba2 !important;
+  }
+
+  .hrp-content [style*='color: #ccc'],
+  .hrp-content [style*='color:#ccc'],
+  .hrp-content [style*='color: #CCC'],
+  .hrp-content [style*='color:#CCC'] {
+    color: #cccccc !important;
+  }
+
+  .hrp-content [style*='color: #e74c3c'],
+  .hrp-content [style*='color:#e74c3c'] {
+    color: #e74c3c !important;
   }
 
   .hrp-content table {
-    @apply w-full border-collapse text-[13px] text-paper;
-    background: rgba(15, 20, 25, 0.65) !important;
+    width: 100%;
+    border-collapse: collapse;
   }
 
   .hrp-content th,
   .hrp-content td {
-    @apply border border-ink-line px-2 py-1 text-left;
-    color: #f3f6fa !important;
-    background: transparent !important;
-  }
-
-  .hrp-content th {
-    @apply font-semibold;
-    background: #151b22 !important;
-    color: #e4ebf3 !important;
-  }
-
-  .hrp-content tr:nth-child(even) td {
-    background: rgba(26, 34, 44, 0.55) !important;
-  }
-
-  .hrp-content img {
-    @apply h-auto max-w-full;
+    padding: 0.35rem 0.5rem;
+    vertical-align: middle;
   }
 }

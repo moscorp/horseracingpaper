@@ -30,7 +30,7 @@ get_header();
                         · <?php echo esc_html(getPostViews($hrp_post->ID)); ?> 次瀏覽
                     <?php endif; ?>
                 </p>
-                <div class="hrp-content text-[15px] leading-relaxed text-paper">
+                <div class="hrp-content text-[15px] leading-relaxed">
                     <?php
                     if (function_exists('setPostViews')) {
                         setPostViews($hrp_post->ID);

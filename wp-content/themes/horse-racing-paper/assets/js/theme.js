@@ -35,21 +35,30 @@
     }
     root.setAttribute('data-hrp-nav-ready', '1');
 
-    // Event delegation — survives LiteSpeed/HTML mutations better than per-button binds.
-    root.addEventListener('click', function (e) {
-      var more = e.target.closest('[data-nav-more]');
-      if (more && root.contains(more)) {
-        e.preventDefault();
-        revealMore(more);
-      }
-    });
+    // Capture phase: <a> inside <summary> both navigates and toggles in Chromium.
+    root.addEventListener(
+      'click',
+      function (e) {
+        var archive = e.target.closest('[data-nav-archive]');
+        if (archive && root.contains(archive)) {
+          e.preventDefault();
+          e.stopPropagation();
+          var href = archive.getAttribute('href');
+          if (href) {
+            window.location.href = href;
+          }
+          return;
+        }
 
-    // Keep title links from also toggling <details> when clicked.
-    root.querySelectorAll('summary .hrp-nav-title').forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        e.stopPropagation();
-      });
-    });
+        var more = e.target.closest('[data-nav-more]');
+        if (more && root.contains(more)) {
+          e.preventDefault();
+          e.stopPropagation();
+          revealMore(more);
+        }
+      },
+      true
+    );
   }
 
   function boot() {
