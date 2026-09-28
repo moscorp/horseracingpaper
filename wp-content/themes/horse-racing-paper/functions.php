@@ -16,7 +16,30 @@ add_action('after_setup_theme', static function (): void {
     register_nav_menus([
         'hrp_primary' => __('主選單', 'horse-racing-paper'),
     ]);
+
+    // Purge LiteSpeed / known page caches when theme version changes after deploy.
+    $ver = (string) (wp_get_theme()->get('Version') ?: '');
+    if ($ver !== '' && get_option('hrp_deployed_theme_ver') !== $ver) {
+        update_option('hrp_deployed_theme_ver', $ver, false);
+        if (has_action('litespeed_purge_all')) {
+            do_action('litespeed_purge_all');
+        }
+        if (class_exists('LiteSpeed\Purge') && method_exists('LiteSpeed\Purge', 'purge_all')) {
+            \LiteSpeed\Purge::purge_all();
+        }
+        if (function_exists('rocket_clean_domain')) {
+            rocket_clean_domain();
+        }
+    }
 });
+
+// Avoid 8h browser HTML cache of wrong singular pages (LiteSpeed was sending max-age=28800).
+add_action('send_headers', static function (): void {
+    if (is_admin()) {
+        return;
+    }
+    header('Cache-Control: private, max-age=0, must-revalidate');
+}, 99);
 
 add_action('wp_enqueue_scripts', static function (): void {
     $ver = wp_get_theme()->get('Version') ?: '0.3.0';
