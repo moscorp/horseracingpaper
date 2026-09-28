@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body.hrp-theme {
+    @apply m-0 bg-ink text-paper font-body text-sm leading-snug antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, #243044 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #2a2218 0%, transparent 50%);
+  }
+
+  body.hrp-theme a {
+    @apply text-inherit no-underline;
+  }
+}
+
+@layer components {
+  .hrp-shell {
+    @apply mx-auto max-w-shell px-3 py-2;
+  }
+
+  .hrp-layout {
+    @apply mx-auto flex max-w-shell gap-3 px-2 py-2 md:px-3;
+  }
+
+  .hrp-sidebar {
+    @apply w-full shrink-0 border border-ink-line bg-ink-mid/70 md:w-56 lg:w-64;
+  }
+
+  .hrp-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .hrp-nav-group + .hrp-nav-group {
+    @apply border-t border-ink-line;
+  }
+
+  .hrp-nav-toggle {
+    @apply flex w-full items-center justify-between gap-2 px-2.5 py-2 text-left text-xs font-semibold text-brass;
+  }
+
+  .hrp-nav-toggle[aria-expanded='false'] + .hrp-nav-panel {
+    @apply hidden;
+  }
+
+  .hrp-nav-list {
+    @apply m-0 list-none px-2 pb-2;
+  }
+
+  .hrp-nav-list li {
+    @apply border-b border-ink-line/70 py-1.5 last:border-0;
+  }
+
+  .hrp-nav-list a {
+    @apply block text-[12px] leading-snug text-paper hover:text-brass;
+  }
+
+  .hrp-nav-meta {
+    @apply mt-0.5 block text-[10px] text-paper-mute;
+  }
+
+  .hrp-nav-more {
+    @apply mt-1 w-full border border-ink-edge bg-ink-soft px-2 py-1 text-[11px] text-paper-soft hover:border-brass hover:text-brass;
+  }
+
+  .hrp-footer {
+    @apply mt-6 border-t border-ink-line bg-ink-soft/80;
+  }
+
+  .hrp-footer-inner {
+    @apply mx-auto flex max-w-shell flex-col gap-2 px-3 py-4 text-[12px] text-paper-mute md:flex-row md:items-center md:justify-between;
+  }
+
+  .hrp-footer a {
+    @apply text-paper-soft hover:text-brass;
+  }
+
+  .hrp-brand-lockup {
+    @apply flex items-center gap-3;
+  }
+
+  .hrp-brand-mark {
+    @apply h-12 w-12 shrink-0 object-contain md:h-14 md:w-14;
+  }
+
+  .hrp-brand-title {
+    @apply m-0 font-display text-2xl font-bold tracking-wide text-brass md:text-3xl;
+  }
+
+  .hrp-brand-sub {
+    @apply m-0 text-xs text-paper-mute md:text-sm;
+  }
+}

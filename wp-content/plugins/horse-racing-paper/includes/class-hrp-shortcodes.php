@@ -21,7 +21,7 @@ final class HRP_Shortcodes
     {
         wp_register_style(
             'hrp-race-day',
-            HRP_PLUGIN_URL . 'public/css/race-day.css',
+            HRP_PLUGIN_URL . 'public/css/hrp-race-day.css',
             [],
             HRP_VERSION
         );

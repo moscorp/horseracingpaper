@@ -1,5 +1,6 @@
-legacy/00/
-legacy/00.zip
-legacy/*.tgz
-*.otf
-*.ttf
+node_modules/
+npm-debug.log*
+.DS_Store
+*.local.php
+.env
+.env.*

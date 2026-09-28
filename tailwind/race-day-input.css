@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .hrp-dense {
+    @apply text-[12px] leading-tight text-paper;
+  }
+
+  .hrp-meeting-meta {
+    @apply mb-1.5 flex flex-wrap gap-x-3 gap-y-1 text-paper-soft;
+  }
+
+  .hrp-meta-strong {
+    @apply font-bold text-brass;
+  }
+
+  .hrp-muted {
+    @apply text-paper-mute;
+  }
+
+  .hrp-race-tabs {
+    @apply mb-1.5 flex flex-wrap gap-0.5;
+  }
+
+  .hrp-race-tabs button {
+    @apply cursor-pointer border border-ink-edge bg-ink-mid px-1.5 py-0.5 text-[11px] text-paper;
+  }
+
+  .hrp-race-tabs button[aria-selected='true'] {
+    @apply border-brass bg-brass-dim text-brass;
+  }
+
+  .hrp-race-head {
+    @apply mb-1 flex flex-wrap items-baseline gap-x-2.5 gap-y-1;
+  }
+
+  .hrp-table-wrap {
+    @apply overflow-x-auto border border-ink-line bg-ink/55;
+  }
+
+  .hrp-dense table {
+    @apply w-full min-w-[720px] border-collapse font-mono tabular-nums;
+  }
+
+  .hrp-dense th,
+  .hrp-dense td {
+    @apply whitespace-nowrap border-b border-ink-line px-1.5 py-0.5 text-left align-middle;
+  }
+
+  .hrp-dense th {
+    @apply sticky top-0 z-[1] bg-ink-soft font-semibold text-paper-mute;
+  }
+
+  .hrp-horse {
+    @apply max-w-[9rem] overflow-hidden text-ellipsis;
+  }
+
+  .hrp-tag {
+    @apply ml-1 inline-block border border-ink-edge px-1 text-[10px] text-paper-soft;
+  }
+
+  .hrp-score {
+    @apply font-bold;
+  }
+
+  .hrp-tier-hot td:first-child,
+  .hrp-tier-hot .hrp-score {
+    @apply text-signal-hot;
+  }
+
+  .hrp-tier-watch .hrp-score {
+    @apply text-signal-watch;
+  }
+
+  .hrp-tier-place .hrp-score {
+    @apply text-signal-place;
+  }
+
+  .hrp-tier-low .hrp-score {
+    @apply text-signal-low;
+  }
+
+  .hrp-legend {
+    @apply mt-1.5 text-[11px] text-paper-mute;
+  }
+
+  .hrp-legend .hrp-tier-hot {
+    @apply text-signal-hot;
+  }
+
+  .hrp-legend .hrp-tier-watch {
+    @apply text-signal-watch;
+  }
+
+  .hrp-legend .hrp-tier-place {
+    @apply text-signal-place;
+  }
+
+  .hrp-legend .hrp-tier-low {
+    @apply text-signal-low;
+  }
+
+  .hrp-empty {
+    @apply my-2 text-paper-mute;
+  }
+
+  .hrp-race-panel[hidden] {
+    display: none !important;
+  }
+}
