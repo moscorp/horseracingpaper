@@ -209,5 +209,25 @@ jobs:
           grep -q 'hrp-single post-19372' /tmp/hrp-plain-body.html
           echo "Smoke OK — plain URL redirects to fresh race-review content"
 
+          # Legacy /00 crons must NOT get the ?hrpv= 302 (cron-job.org fails on 302).
+          for cron_path in \
+            /00/HKJCOddsManager_cron.php \
+            /00/cron_odds2db.php \
+            /00/HKJCHorseHistoryBatchManager_sync.php \
+            /00/cron_stheadline.php
+          do
+            code=$(curl -sS -o /tmp/hrp-cron-body.txt -w '%{http_code}' -A 'HRP-Deploy/1.0' \
+              "https://buycarl.com${cron_path}")
+            echo "cron ${cron_path} http=${code}"
+            if [ "$code" = "302" ] || [ "$code" = "301" ]; then
+              echo "FAIL: ${cron_path} still redirected (cache-bust leaking onto /00)" >&2
+              exit 1
+            fi
+            if [ "$code" != "200" ] && [ "$code" != "204" ]; then
+              echo "WARN: ${cron_path} returned ${code} (not a redirect; script-level issue)" >&2
+            fi
+          done
+          echo "Smoke OK — /00 cron URLs are not redirected"
+
       - name: Summary
         run: echo "Deployed theme + plugin; purged caches; smoke-checked singles." >> "$GITHUB_STEP_SUMMARY"
