@@ -13,6 +13,7 @@ on:
     paths:
       - "wp-content/themes/horse-racing-paper/**"
       - "wp-content/plugins/horse-racing-paper/**"
+      - "deploy/**"
       - ".github/workflows/deploy-hrp.yml"
 
 jobs:
@@ -151,22 +152,10 @@ jobs:
               rm_tree(cache_path)
 
           # Prepend .htaccess 302 → ?hrpv= so plain pretty URLs bypass stale LS public cache.
-          HRP_VER = "0.3.6"
-          HRP_BLOCK_BEGIN = "# BEGIN HRP Cache Bust"
-          HRP_BLOCK_END = "# END HRP Cache Bust"
-          HRP_BLOCK = f"""{HRP_BLOCK_BEGIN}
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteCond %{{REQUEST_METHOD}} GET [NC]
-RewriteCond %{{QUERY_STRING}} !(^|&)hrpv=
-RewriteCond %{{REQUEST_URI}} !^/wp-(admin|content|includes|json|cron) [NC]
-RewriteCond %{{REQUEST_URI}} !^/(xmlrpc\\.php|favicon\\.ico) [NC]
-RewriteCond %{{REQUEST_URI}} !\\.(css|js|mjs|map|jpe?g|png|gif|webp|ico|svg|woff2?|ttf|eot|txt|xml|pdf|zip|gz)$ [NC]
-RewriteRule ^(.*)$ /$1?hrpv={HRP_VER} [R=302,L,QSA]
-</IfModule>
-{HRP_BLOCK_END}
-"""
           import io, re
+          bust_path = Path("deploy/hrp-htaccess-bust.conf")
+          hrp_block = bust_path.read_text(encoding="utf-8").strip() + "\n"
+          begin, end = "# BEGIN HRP Cache Bust", "# END HRP Cache Bust"
           ftp.cwd(root)
           existing = ""
           try:
@@ -177,15 +166,15 @@ RewriteRule ^(.*)$ /$1?hrpv={HRP_VER} [R=302,L,QSA]
           except Exception as e:
               print("no existing .htaccess", e)
 
-          if HRP_BLOCK_BEGIN in existing:
+          if begin in existing:
               existing = re.sub(
-                  re.escape(HRP_BLOCK_BEGIN) + r"[\s\S]*?" + re.escape(HRP_BLOCK_END) + r"\n?",
+                  re.escape(begin) + r"[\s\S]*?" + re.escape(end) + r"\n?",
                   "",
                   existing,
               )
-          new_ht = HRP_BLOCK + "\n" + existing.lstrip("\n")
+          new_ht = hrp_block + "\n" + existing.lstrip("\n")
           ftp.storbinary("STOR .htaccess", io.BytesIO(new_ht.encode("utf-8")))
-          print("wrote .htaccess with HRP cache-bust redirect")
+          print("wrote .htaccess with HRP cache-bust redirect", len(new_ht))
 
           ftp.quit()
           print("SUCCESS")
