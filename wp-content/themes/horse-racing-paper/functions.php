@@ -9,6 +9,37 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Theme asset version — filemtime so CDN/browser cannot keep stale JS/CSS.
+ */
+function hrp_asset_ver(string $relative): string
+{
+    $path = get_template_directory() . $relative;
+    $mtime = file_exists($path) ? (string) filemtime($path) : '';
+    $theme = (string) (wp_get_theme()->get('Version') ?: '0');
+    return $theme . ($mtime !== '' ? '.' . $mtime : '');
+}
+
+/**
+ * Ask LiteSpeed / known caches to drop everything (safe to call repeatedly).
+ */
+function hrp_purge_page_caches(): void
+{
+    if (!headers_sent()) {
+        // LiteSpeed Cache honors this response header.
+        header('X-LiteSpeed-Purge: *');
+    }
+    if (has_action('litespeed_purge_all')) {
+        do_action('litespeed_purge_all');
+    }
+    if (class_exists('LiteSpeed\Purge') && method_exists('LiteSpeed\Purge', 'purge_all')) {
+        \LiteSpeed\Purge::purge_all();
+    }
+    if (function_exists('rocket_clean_domain')) {
+        rocket_clean_domain();
+    }
+}
+
 add_action('after_setup_theme', static function (): void {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
@@ -16,33 +47,47 @@ add_action('after_setup_theme', static function (): void {
     register_nav_menus([
         'hrp_primary' => __('主選單', 'horse-racing-paper'),
     ]);
-
-    // Purge LiteSpeed / known page caches when theme version changes after deploy.
-    $ver = (string) (wp_get_theme()->get('Version') ?: '');
-    if ($ver !== '' && get_option('hrp_deployed_theme_ver') !== $ver) {
-        update_option('hrp_deployed_theme_ver', $ver, false);
-        if (has_action('litespeed_purge_all')) {
-            do_action('litespeed_purge_all');
-        }
-        if (class_exists('LiteSpeed\Purge') && method_exists('LiteSpeed\Purge', 'purge_all')) {
-            \LiteSpeed\Purge::purge_all();
-        }
-        if (function_exists('rocket_clean_domain')) {
-            rocket_clean_domain();
-        }
-    }
 });
 
-// Avoid 8h browser HTML cache of wrong singular pages (LiteSpeed was sending max-age=28800).
+// Run early so a single uncached hit after deploy can wipe stale HTML.
+add_action('init', static function (): void {
+    $ver = (string) (wp_get_theme()->get('Version') ?: '');
+    if ($ver === '') {
+        return;
+    }
+    if (get_option('hrp_deployed_theme_ver') !== $ver) {
+        update_option('hrp_deployed_theme_ver', $ver, false);
+        update_option('hrp_force_purge_once', $ver, false);
+    }
+
+    // Manual purge: /?hrp_purge=1 (also used by deploy smoke curl).
+    $want = isset($_GET['hrp_purge']) && (string) $_GET['hrp_purge'] !== '';
+    $pending = get_option('hrp_force_purge_once');
+    if ($want || ($pending && $pending === $ver)) {
+        hrp_purge_page_caches();
+        if ($pending) {
+            delete_option('hrp_force_purge_once');
+        }
+    }
+}, 0);
+
 add_action('send_headers', static function (): void {
     if (is_admin()) {
         return;
     }
+    // Do not let LiteSpeed/browser keep bad HTML for hours.
     header('Cache-Control: private, max-age=0, must-revalidate');
-}, 99);
+    if (function_exists('do_action')) {
+        do_action('litespeed_control_set_nocache', 'hrp html must revalidate');
+    }
+    // Pending purge flag still set → keep sending purge header until cleared on init.
+    $ver = (string) (wp_get_theme()->get('Version') ?: '');
+    if ($ver !== '' && get_option('hrp_force_purge_once') === $ver && !headers_sent()) {
+        header('X-LiteSpeed-Purge: *');
+    }
+}, 0);
 
 add_action('wp_enqueue_scripts', static function (): void {
-    $ver = wp_get_theme()->get('Version') ?: '0.3.0';
     wp_enqueue_style(
         'hrp-fonts',
         'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&family=Noto+Serif+TC:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap',
@@ -53,13 +98,13 @@ add_action('wp_enqueue_scripts', static function (): void {
         'hrp-theme',
         get_template_directory_uri() . '/assets/css/hrp.css',
         ['hrp-fonts'],
-        $ver
+        hrp_asset_ver('/assets/css/hrp.css')
     );
     wp_enqueue_script(
         'hrp-theme',
         get_template_directory_uri() . '/assets/js/theme.js',
         [],
-        $ver,
+        hrp_asset_ver('/assets/js/theme.js'),
         true
     );
 }, 5);
@@ -73,9 +118,6 @@ add_action('wp_head', static function (): void {
     echo '<link rel="apple-touch-icon" href="' . esc_url($apple) . '">' . "\n";
 }, 1);
 
-/**
- * Shared layout helpers.
- */
 function hrp_brand_title(): string
 {
     if (class_exists('HRP_Settings')) {
