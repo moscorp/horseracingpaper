@@ -24,3 +24,11 @@ Create `00/lib/constants.local.php` on the server (not in git) for legacy cron s
 ## You do NOT need to activate until deploy finishes
 
 Local GitHub code alone does not change the live site. Activate only after the deploy workflow succeeds (or you manually upload `wp-content/themes/horse-racing-paper` and `wp-content/plugins/horse-racing-paper`).
+
+## If single posts fatal: `getPostViews()`
+
+Cause: **AliDropship (alids)** blog template still renders singles and calls `getPostViews()`, which lived in the old theme.
+
+Fix (plugin ≥ 0.2.1): Horse Racing Paper defines `getPostViews` / `setPostViews` compatibility shims. Redeploy plugin, then reload the post.
+
+Optional later: disable alids “blog template” / use our theme `single.php` only, so store plugin stops owning race-analysis posts.
