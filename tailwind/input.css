@@ -146,6 +146,50 @@
     color: #f3f6fa;
   }
 
+  /* Bare headings inside light cards inherit forced paper color — override. */
+  .hrp-content [style*='background: #f'] h1,
+  .hrp-content [style*='background:#f'] h1,
+  .hrp-content [style*='background: #e'] h1,
+  .hrp-content [style*='background:#e'] h1,
+  .hrp-content [style*='background: #F'] h1,
+  .hrp-content [style*='background:#F'] h1,
+  .hrp-content [style*='background: white'] h1,
+  .hrp-content [style*='background:white'] h1,
+  .hrp-content [style*='background: #f'] h2,
+  .hrp-content [style*='background:#f'] h2,
+  .hrp-content [style*='background: #e'] h2,
+  .hrp-content [style*='background:#e'] h2,
+  .hrp-content [style*='background: #F'] h2,
+  .hrp-content [style*='background:#F'] h2,
+  .hrp-content [style*='background: white'] h2,
+  .hrp-content [style*='background:white'] h2,
+  .hrp-content [style*='background: #f'] h3,
+  .hrp-content [style*='background:#f'] h3,
+  .hrp-content [style*='background: #e'] h3,
+  .hrp-content [style*='background:#e'] h3,
+  .hrp-content [style*='background: #F'] h3,
+  .hrp-content [style*='background:#F'] h3,
+  .hrp-content [style*='background: white'] h3,
+  .hrp-content [style*='background:white'] h3,
+  .hrp-content [style*='background: #f'] h4,
+  .hrp-content [style*='background:#f'] h4,
+  .hrp-content [style*='background: #e'] h4,
+  .hrp-content [style*='background:#e'] h4,
+  .hrp-content [style*='background: #F'] h4,
+  .hrp-content [style*='background:#F'] h4,
+  .hrp-content [style*='background: white'] h4,
+  .hrp-content [style*='background:white'] h4,
+  .hrp-content [style*='background: #c'] h1,
+  .hrp-content [style*='background:#c'] h1,
+  .hrp-content [style*='background: #c'] h2,
+  .hrp-content [style*='background:#c'] h2,
+  .hrp-content [style*='background: #c'] h3,
+  .hrp-content [style*='background:#c'] h3,
+  .hrp-content [style*='background: #c'] h4,
+  .hrp-content [style*='background:#c'] h4 {
+    color: #111827 !important;
+  }
+
   .hrp-content img {
     height: auto;
     max-width: 100%;
