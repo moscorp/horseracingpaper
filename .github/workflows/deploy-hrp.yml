@@ -7,7 +7,9 @@ name: Deploy theme & plugin to Namecheap
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "cursor/**"
     paths:
       - "wp-content/themes/horse-racing-paper/**"
       - "wp-content/plugins/horse-racing-paper/**"
