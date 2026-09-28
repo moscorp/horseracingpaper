@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body.hrp-theme {
+    @apply m-0 bg-ink text-paper font-body text-sm leading-snug antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, #243044 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #2a2218 0%, transparent 50%);
+  }
+
+  body.hrp-theme a {
+    @apply text-inherit no-underline;
+  }
+}
+
+@layer components {
+  .hrp-shell {
+    @apply mx-auto max-w-shell px-3 py-2;
+  }
+
+  .hrp-layout {
+    @apply mx-auto flex max-w-shell gap-3 px-2 py-2 md:px-3;
+  }
+
+  .hrp-sidebar {
+    @apply w-full shrink-0 border border-ink-line bg-ink-mid/80 md:w-56 lg:w-64;
+  }
+
+  .hrp-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .hrp-nav-group + .hrp-nav-group {
+    @apply border-t border-ink-line;
+  }
+
+  .hrp-nav-group > summary {
+    list-style: none;
+  }
+
+  .hrp-nav-group > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .hrp-nav-heading {
+    @apply flex cursor-pointer items-stretch select-none;
+  }
+
+  .hrp-nav-title {
+    @apply flex flex-1 items-center gap-2 px-2.5 py-2 text-left text-xs font-semibold text-brass;
+  }
+
+  .hrp-nav-archive {
+    @apply text-[10px] font-normal text-paper-dim underline hover:text-brass;
+  }
+
+  .hrp-nav-caret {
+    @apply relative flex w-10 shrink-0 items-center justify-center border-l border-ink-line text-paper-soft hover:bg-ink-soft hover:text-brass;
+  }
+
+  .hrp-nav-caret::before {
+    content: '+';
+    @apply text-lg font-semibold leading-none;
+  }
+
+  .hrp-nav-group[open] > summary .hrp-nav-caret::before {
+    content: '−';
+  }
+
+  .hrp-nav-panel {
+    @apply block;
+  }
+
+  .hrp-nav-list {
+    @apply m-0 list-none px-2 pb-2;
+  }
+
+  .hrp-nav-list li {
+    @apply border-b border-ink-line/70 py-1.5 last:border-0;
+  }
+
+  .hrp-nav-list a {
+    @apply block text-[12px] leading-snug text-paper hover:text-brass;
+  }
+
+  .hrp-nav-meta {
+    @apply mt-0.5 block text-[11px] text-paper-dim;
+  }
+
+  .hrp-nav-more {
+    @apply mt-1 w-full border border-ink-edge bg-ink-soft px-2 py-1 text-[11px] text-paper-soft hover:border-brass hover:text-brass;
+  }
+
+  .hrp-footer {
+    @apply mt-6 border-t border-ink-line bg-ink-soft/80;
+  }
+
+  .hrp-footer-inner {
+    @apply mx-auto flex max-w-shell flex-col gap-2 px-3 py-4 text-[12px] text-paper-dim md:flex-row md:items-center md:justify-between;
+  }
+
+  .hrp-footer a {
+    @apply text-paper-soft hover:text-brass;
+  }
+
+  .hrp-brand-lockup {
+    @apply flex items-center gap-3;
+  }
+
+  .hrp-brand-mark {
+    @apply h-12 w-12 shrink-0 object-contain md:h-14 md:w-14;
+  }
+
+  .hrp-brand-title {
+    @apply m-0 font-display text-2xl font-bold tracking-wide text-brass md:text-3xl;
+  }
+
+  .hrp-brand-sub {
+    @apply m-0 text-xs text-paper-dim md:text-sm;
+  }
+
+  /*
+   * Post HTML (賽後回顧 / 賽事分析 / 預測) ships light cards + yellow rows.
+   * Never force light text onto those surfaces — that made fonts “invisible”.
+   */
+  .hrp-content {
+    color: #e8eef4;
+    line-height: 1.55;
+  }
+
+  .hrp-content > *:first-child {
+    margin-top: 0;
+  }
+
+  .hrp-content a {
+    color: #d4b26a !important;
+    text-decoration: underline;
+  }
+
+  .hrp-content h1,
+  .hrp-content h2,
+  .hrp-content h3,
+  .hrp-content h4 {
+    color: #f3f6fa;
+  }
+
+  /* Bare headings inside light cards inherit forced paper color — override. */
+  .hrp-content [style*='background: #f'] h1,
+  .hrp-content [style*='background:#f'] h1,
+  .hrp-content [style*='background: #e'] h1,
+  .hrp-content [style*='background:#e'] h1,
+  .hrp-content [style*='background: #F'] h1,
+  .hrp-content [style*='background:#F'] h1,
+  .hrp-content [style*='background: white'] h1,
+  .hrp-content [style*='background:white'] h1,
+  .hrp-content [style*='background: #f'] h2,
+  .hrp-content [style*='background:#f'] h2,
+  .hrp-content [style*='background: #e'] h2,
+  .hrp-content [style*='background:#e'] h2,
+  .hrp-content [style*='background: #F'] h2,
+  .hrp-content [style*='background:#F'] h2,
+  .hrp-content [style*='background: white'] h2,
+  .hrp-content [style*='background:white'] h2,
+  .hrp-content [style*='background: #f'] h3,
+  .hrp-content [style*='background:#f'] h3,
+  .hrp-content [style*='background: #e'] h3,
+  .hrp-content [style*='background:#e'] h3,
+  .hrp-content [style*='background: #F'] h3,
+  .hrp-content [style*='background:#F'] h3,
+  .hrp-content [style*='background: white'] h3,
+  .hrp-content [style*='background:white'] h3,
+  .hrp-content [style*='background: #f'] h4,
+  .hrp-content [style*='background:#f'] h4,
+  .hrp-content [style*='background: #e'] h4,
+  .hrp-content [style*='background:#e'] h4,
+  .hrp-content [style*='background: #F'] h4,
+  .hrp-content [style*='background:#F'] h4,
+  .hrp-content [style*='background: white'] h4,
+  .hrp-content [style*='background:white'] h4,
+  .hrp-content [style*='background: #c'] h1,
+  .hrp-content [style*='background:#c'] h1,
+  .hrp-content [style*='background: #c'] h2,
+  .hrp-content [style*='background:#c'] h2,
+  .hrp-content [style*='background: #c'] h3,
+  .hrp-content [style*='background:#c'] h3,
+  .hrp-content [style*='background: #c'] h4,
+  .hrp-content [style*='background:#c'] h4 {
+    color: #111827 !important;
+  }
+
+  .hrp-content img {
+    height: auto;
+    max-width: 100%;
+  }
+
+  /*
+   * Light surfaces (inline #f…/#e…/#fff/white) inherit page paper text and go
+   * invisible. Set dark text on the painted element only — children keep their
+   * own inline accent colors (#667eea, #333, …) via normal cascade.
+   */
+  .hrp-content [style*='background: #f'],
+  .hrp-content [style*='background:#f'],
+  .hrp-content [style*='background: #e'],
+  .hrp-content [style*='background:#e'],
+  .hrp-content [style*='background: #d'],
+  .hrp-content [style*='background:#d'],
+  .hrp-content [style*='background: #c'],
+  .hrp-content [style*='background:#c'],
+  .hrp-content [style*='background: #F'],
+  .hrp-content [style*='background:#F'],
+  .hrp-content [style*='background: #E'],
+  .hrp-content [style*='background:#E'],
+  .hrp-content [style*='background: #C'],
+  .hrp-content [style*='background:#C'],
+  .hrp-content [style*='background: white'],
+  .hrp-content [style*='background:white'],
+  .hrp-content [style*='background-color: #f'],
+  .hrp-content [style*='background-color:#f'],
+  .hrp-content [style*='background-color: #e'],
+  .hrp-content [style*='background-color:#e'],
+  .hrp-content [style*='background-color: #F'],
+  .hrp-content [style*='background-color:#F'],
+  .hrp-content [style*='background-color: white'],
+  .hrp-content [style*='background-color:white'] {
+    color: #111827 !important;
+  }
+
+  /* Highlight rows: paint the cells so text is dark on yellow/pink/green */
+  .hrp-content tr[style*='background: #f'] > td,
+  .hrp-content tr[style*='background:#f'] > td,
+  .hrp-content tr[style*='background: #e'] > td,
+  .hrp-content tr[style*='background:#e'] > td,
+  .hrp-content tr[style*='background: #F'] > td,
+  .hrp-content tr[style*='background:#F'] > td,
+  .hrp-content tr[style*='background: #E'] > td,
+  .hrp-content tr[style*='background:#E'] > td {
+    color: #111827 !important;
+  }
+
+  /* Inline colors must beat the light-surface rule above (same !important tier). */
+  .hrp-content [style*='color: white'],
+  .hrp-content [style*='color:white'],
+  .hrp-content [style*='color: #fff'],
+  .hrp-content [style*='color:#fff'],
+  .hrp-content [style*='color: #FFF'],
+  .hrp-content [style*='color:#FFF'] {
+    color: #ffffff !important;
+  }
+
+  .hrp-content [style*='color: #FFD700'],
+  .hrp-content [style*='color:#FFD700'],
+  .hrp-content [style*='color: #ffd700'],
+  .hrp-content [style*='color:#ffd700'] {
+    color: #ffd700 !important;
+  }
+
+  .hrp-content [style*='color: #333'],
+  .hrp-content [style*='color:#333'] {
+    color: #333333 !important;
+  }
+
+  .hrp-content [style*='color: #666'],
+  .hrp-content [style*='color:#666'] {
+    color: #666666 !important;
+  }
+
+  .hrp-content [style*='color: #999'],
+  .hrp-content [style*='color:#999'] {
+    color: #999999 !important;
+  }
+
+  .hrp-content [style*='color: #667eea'],
+  .hrp-content [style*='color:#667eea'] {
+    color: #667eea !important;
+  }
+
+  .hrp-content [style*='color: #764ba2'],
+  .hrp-content [style*='color:#764ba2'] {
+    color: #764ba2 !important;
+  }
+
+  .hrp-content [style*='color: #ccc'],
+  .hrp-content [style*='color:#ccc'],
+  .hrp-content [style*='color: #CCC'],
+  .hrp-content [style*='color:#CCC'] {
+    color: #cccccc !important;
+  }
+
+  .hrp-content [style*='color: #e74c3c'],
+  .hrp-content [style*='color:#e74c3c'] {
+    color: #e74c3c !important;
+  }
+
+  .hrp-content table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .hrp-content th,
+  .hrp-content td {
+    padding: 0.35rem 0.5rem;
+    vertical-align: middle;
+  }
+}
