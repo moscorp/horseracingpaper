@@ -1,0 +1,1345 @@
+{
+    "code": 200,
+    "data": {
+        "race": {
+            "_id": "6775e6cf4ea5645c597feff5",
+            "raceNo": 1,
+            "raceDate": "2025-01-04T16:00:00.000Z",
+            "__v": 0,
+            "distance": "1200",
+            "grade": "5",
+            "name": "\u65ac\u7af9\u7063\u8b93\u8cfd",
+            "nameEn": "TSAM CHUK WAN HANDICAP",
+            "nameSc": "\u65a9\u7af9\u6e7e\u8ba9\u8d5b",
+            "raceCourse": "L",
+            "raceDayNo": 35,
+            "raceId": "RACE_20250105_0010",
+            "raceIndex": 318,
+            "raceTrack": "TURF",
+            "raceType": "H",
+            "raceVenue": "ST",
+            "rating": "040-000",
+            "ratingType": "H",
+            "remarks": "",
+            "report": "",
+            "startTime": "2025-01-05T05:00:00.000Z",
+            "state": "entry",
+            "trackCondition": "",
+            "updatedAt": "2025-01-03T08:44:08.000Z",
+            "changes": "10 \u865f\u99ac \u5a01\u529b\u52c7\u9a65 \u9000\u51fa\u7af6\u8cfd,\u7531\u5f8c\u5099\u99ac \u5999\u82b3\u83ef \u88dc\u4e0a\uff0c\u6f58\u660e\u8f1d \u7b56\u9a0e\u3002",
+            "changesUpdatedAt": "2025-01-03T08:43:26.744Z",
+            "createdAt": "2025-01-03T08:43:26.000Z",
+            "cached": true
+        },
+        "win": {
+            "type": "win",
+            "snapshotTime": "2025-01-04T09:14:08.936Z",
+            "source": "WIN-01-RACE_20250105_0010-202501041714134580.xml",
+            "raceId": "RACE_20250105_0010",
+            "raceDate": "2025-01-04T16:00:00.000Z",
+            "raceNo": 1,
+            "raecNoLegs": [],
+            "raceOddsList": [
+                {
+                    "type": "win",
+                    "horseNo1": 1,
+                    "horseNo2": null,
+                    "value": 4.5,
+                    "willPay": 45,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 2,
+                    "horseNo2": null,
+                    "value": 15,
+                    "willPay": 158.5,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 3,
+                    "horseNo2": null,
+                    "value": 4,
+                    "willPay": 40,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 4,
+                    "horseNo2": null,
+                    "value": 5.29999999999999982236431605997495353221893310546875,
+                    "willPay": 53.5,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 5,
+                    "horseNo2": null,
+                    "value": 11,
+                    "willPay": 112,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 6,
+                    "horseNo2": null,
+                    "value": 19,
+                    "willPay": 191.5,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 7,
+                    "horseNo2": null,
+                    "value": 10,
+                    "willPay": 103,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 8,
+                    "horseNo2": null,
+                    "value": 15,
+                    "willPay": 159,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 9,
+                    "horseNo2": null,
+                    "value": 12,
+                    "willPay": 126,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 10,
+                    "horseNo2": null,
+                    "value": 18,
+                    "willPay": 188.5,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 11,
+                    "horseNo2": null,
+                    "value": 44,
+                    "willPay": 443.5,
+                    "investment": -1
+                },
+                {
+                    "type": "win",
+                    "horseNo1": 12,
+                    "horseNo2": null,
+                    "value": 30,
+                    "willPay": 300,
+                    "investment": -1
+                }
+            ],
+            "totalInvestment": 717226,
+            "raceLegs": [],
+            "cached": true,
+            "baseline": null
+        },
+        "place": {
+            "type": "place",
+            "snapshotTime": "2025-01-04T09:14:08.942Z",
+            "source": "PLA-01-RACE_20250105_0010-202501041714146612.xml",
+            "raceId": "RACE_20250105_0010",
+            "raceDate": "2025-01-04T16:00:00.000Z",
+            "raceNo": 1,
+            "raecNoLegs": [],
+            "raceOddsList": [
+                {
+                    "type": "place",
+                    "horseNo1": 1,
+                    "horseNo2": null,
+                    "value": 1.899999999999999911182158029987476766109466552734375,
+                    "willPay": 19,
+                    "investment": 78946
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 2,
+                    "horseNo2": null,
+                    "value": 4.5,
+                    "willPay": 45,
+                    "investment": 33087
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 3,
+                    "horseNo2": null,
+                    "value": 1.899999999999999911182158029987476766109466552734375,
+                    "willPay": 19.5,
+                    "investment": 76800
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 4,
+                    "horseNo2": null,
+                    "value": 1.899999999999999911182158029987476766109466552734375,
+                    "willPay": 19.5,
+                    "investment": 76336
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 5,
+                    "horseNo2": null,
+                    "value": 3.5,
+                    "willPay": 35.5,
+                    "investment": 41969
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 6,
+                    "horseNo2": null,
+                    "value": 5.70000000000000017763568394002504646778106689453125,
+                    "willPay": 57.5,
+                    "investment": 25790
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 7,
+                    "horseNo2": null,
+                    "value": 2.5,
+                    "willPay": 25.5,
+                    "investment": 57866
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 8,
+                    "horseNo2": null,
+                    "value": 4.9000000000000003552713678800500929355621337890625,
+                    "willPay": 49.5,
+                    "investment": 29861
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 9,
+                    "horseNo2": null,
+                    "value": 3.20000000000000017763568394002504646778106689453125,
+                    "willPay": 32,
+                    "investment": 46454
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 10,
+                    "horseNo2": null,
+                    "value": 4.29999999999999982236431605997495353221893310546875,
+                    "willPay": 43,
+                    "investment": 34431
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 11,
+                    "horseNo2": null,
+                    "value": 11,
+                    "willPay": 111,
+                    "investment": 13371
+                },
+                {
+                    "type": "place",
+                    "horseNo1": 12,
+                    "horseNo2": null,
+                    "value": 5.9000000000000003552713678800500929355621337890625,
+                    "willPay": 59,
+                    "investment": 25065
+                }
+            ],
+            "totalInvestment": 539976,
+            "raceLegs": [],
+            "cached": true,
+            "baseline": null
+        },
+        "quin": {
+            "type": "quin",
+            "snapshotTime": "2025-01-04T09:14:08.948Z",
+            "source": "QIN-01-RACE_20250105_0010-202501041714163955.xml",
+            "raceId": "RACE_20250105_0010",
+            "raceDate": "2025-01-04T16:00:00.000Z",
+            "raceNo": 1,
+            "raecNoLegs": [],
+            "raceOddsList": [
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 2,
+                    "value": 80,
+                    "willPay": 805.5,
+                    "investment": 6480
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 3,
+                    "value": 7.79999999999999982236431605997495353221893310546875,
+                    "willPay": 78,
+                    "investment": 66866
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 3,
+                    "value": 97,
+                    "willPay": 978.5,
+                    "investment": 5335
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 4,
+                    "value": 9.199999999999999289457264239899814128875732421875,
+                    "willPay": 92.5,
+                    "investment": 56477
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 4,
+                    "value": 113,
+                    "willPay": 1135,
+                    "investment": 4599
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 4,
+                    "value": 9.800000000000000710542735760100185871124267578125,
+                    "willPay": 98.5,
+                    "investment": 52932
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 5,
+                    "value": 13,
+                    "willPay": 136.5,
+                    "investment": 38312
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 5,
+                    "value": 180,
+                    "willPay": 1800.5,
+                    "investment": 2899
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 5,
+                    "value": 21,
+                    "willPay": 213,
+                    "investment": 24509
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 5,
+                    "value": 20,
+                    "willPay": 201.5,
+                    "investment": 25886
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 6,
+                    "value": 40,
+                    "willPay": 404.5,
+                    "investment": 12912
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 6,
+                    "value": 464,
+                    "willPay": 4648.5,
+                    "investment": 1123
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 6,
+                    "value": 34,
+                    "willPay": 340.5,
+                    "investment": 15337
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 6,
+                    "value": 47,
+                    "willPay": 476,
+                    "investment": 10966
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 6,
+                    "value": 54,
+                    "willPay": 544.5,
+                    "investment": 9584
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 7,
+                    "value": 22,
+                    "willPay": 229,
+                    "investment": 22776
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 7,
+                    "value": 255,
+                    "willPay": 2555,
+                    "investment": 2043
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 7,
+                    "value": 24,
+                    "willPay": 246.5,
+                    "investment": 21177
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 7,
+                    "value": 31,
+                    "willPay": 315,
+                    "investment": 16571
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 7,
+                    "value": 66,
+                    "willPay": 663,
+                    "investment": 7872
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 7,
+                    "value": 69,
+                    "willPay": 697,
+                    "investment": 7489
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 8,
+                    "value": 59,
+                    "willPay": 591.5,
+                    "investment": 8822
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 8,
+                    "value": 271,
+                    "willPay": 2712,
+                    "investment": 1925
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 8,
+                    "value": 44,
+                    "willPay": 445,
+                    "investment": 11732
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 8,
+                    "value": 43,
+                    "willPay": 435,
+                    "investment": 12004
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 8,
+                    "value": 89,
+                    "willPay": 898.5,
+                    "investment": 5809
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 8,
+                    "value": 137,
+                    "willPay": 1371,
+                    "investment": 3808
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 7,
+                    "horseNo2": 8,
+                    "value": 117,
+                    "willPay": 1171.5,
+                    "investment": 4456
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 9,
+                    "value": 40,
+                    "willPay": 409,
+                    "investment": 12758
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 9,
+                    "value": 245,
+                    "willPay": 2452,
+                    "investment": 2129
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 9,
+                    "value": 36,
+                    "willPay": 364.5,
+                    "investment": 14318
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 9,
+                    "value": 27,
+                    "willPay": 274,
+                    "investment": 19055
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 9,
+                    "value": 69,
+                    "willPay": 696.5,
+                    "investment": 7493
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 9,
+                    "value": 73,
+                    "willPay": 734,
+                    "investment": 7113
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 7,
+                    "horseNo2": 9,
+                    "value": 111,
+                    "willPay": 1119.5,
+                    "investment": 4664
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 8,
+                    "horseNo2": 9,
+                    "value": 107,
+                    "willPay": 1071.5,
+                    "investment": 4873
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 10,
+                    "value": 70,
+                    "willPay": 704.5,
+                    "investment": 7410
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 10,
+                    "value": 297,
+                    "willPay": 2973,
+                    "investment": 1756
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 10,
+                    "value": 37,
+                    "willPay": 378,
+                    "investment": 13807
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 10,
+                    "value": 71,
+                    "willPay": 715.5,
+                    "investment": 7297
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 10,
+                    "value": 140,
+                    "willPay": 1404.5,
+                    "investment": 3717
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 10,
+                    "value": 196,
+                    "willPay": 1964,
+                    "investment": 2658
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 7,
+                    "horseNo2": 10,
+                    "value": 96,
+                    "willPay": 968.5,
+                    "investment": 5391
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 8,
+                    "horseNo2": 10,
+                    "value": 162,
+                    "willPay": 1629.5,
+                    "investment": 3204
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 9,
+                    "horseNo2": 10,
+                    "value": 145,
+                    "willPay": 1459.5,
+                    "investment": 3577
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 11,
+                    "value": 206,
+                    "willPay": 2065,
+                    "investment": 2528
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 11,
+                    "value": 525,
+                    "willPay": 5257,
+                    "investment": 993
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 11,
+                    "value": 175,
+                    "willPay": 1750,
+                    "investment": 2983
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 11,
+                    "value": 213,
+                    "willPay": 2130.5,
+                    "investment": 2450
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 11,
+                    "value": 419,
+                    "willPay": 4196.5,
+                    "investment": 1244
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 11,
+                    "value": 491,
+                    "willPay": 4915.5,
+                    "investment": 1062
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 7,
+                    "horseNo2": 11,
+                    "value": 334,
+                    "willPay": 3348.5,
+                    "investment": 1559
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 8,
+                    "horseNo2": 11,
+                    "value": 450,
+                    "willPay": 4504,
+                    "investment": 1159
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 9,
+                    "horseNo2": 11,
+                    "value": 178,
+                    "willPay": 1782.5,
+                    "investment": 2929
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 10,
+                    "horseNo2": 11,
+                    "value": 442,
+                    "willPay": 4427.5,
+                    "investment": 1179
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 1,
+                    "horseNo2": 12,
+                    "value": 90,
+                    "willPay": 900,
+                    "investment": 5800
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 2,
+                    "horseNo2": 12,
+                    "value": 383,
+                    "willPay": 3838.5,
+                    "investment": 1360
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 3,
+                    "horseNo2": 12,
+                    "value": 84,
+                    "willPay": 849.5,
+                    "investment": 6144
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 4,
+                    "horseNo2": 12,
+                    "value": 102,
+                    "willPay": 1024,
+                    "investment": 5099
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 5,
+                    "horseNo2": 12,
+                    "value": 228,
+                    "willPay": 2287.5,
+                    "investment": 2282
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 6,
+                    "horseNo2": 12,
+                    "value": 337,
+                    "willPay": 3372.5,
+                    "investment": 1548
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 7,
+                    "horseNo2": 12,
+                    "value": 204,
+                    "willPay": 2047,
+                    "investment": 2550
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 8,
+                    "horseNo2": 12,
+                    "value": 289,
+                    "willPay": 2898.5,
+                    "investment": 1801
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 9,
+                    "horseNo2": 12,
+                    "value": 192,
+                    "willPay": 1920.5,
+                    "investment": 2718
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 10,
+                    "horseNo2": 12,
+                    "value": 263,
+                    "willPay": 2634,
+                    "investment": 1982
+                },
+                {
+                    "type": "quin",
+                    "horseNo1": 11,
+                    "horseNo2": 12,
+                    "value": 356,
+                    "willPay": 3561,
+                    "investment": 1466
+                }
+            ],
+            "totalInvestment": 632757,
+            "raceLegs": [],
+            "cached": true,
+            "baseline": null
+        },
+        "place-quin": {
+            "type": "place-quin",
+            "snapshotTime": "2025-01-04T09:14:08.955Z",
+            "source": "QPL-01-RACE_20250105_0010-202501041714165518.xml",
+            "raceId": "RACE_20250105_0010",
+            "raceDate": "2025-01-04T16:00:00.000Z",
+            "raceNo": 1,
+            "raecNoLegs": [],
+            "raceOddsList": [
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 2,
+                    "value": 6.9000000000000003552713678800500929355621337890625,
+                    "willPay": 69.5,
+                    "investment": 34347
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 3,
+                    "value": 3.70000000000000017763568394002504646778106689453125,
+                    "willPay": 37.5,
+                    "investment": 63744
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 3,
+                    "value": 30,
+                    "willPay": 301,
+                    "investment": 7915
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 4,
+                    "value": 3.399999999999999911182158029987476766109466552734375,
+                    "willPay": 34.5,
+                    "investment": 68810
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 4,
+                    "value": 31,
+                    "willPay": 319.5,
+                    "investment": 7456
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 4,
+                    "value": 4,
+                    "willPay": 40.5,
+                    "investment": 58994
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 5,
+                    "value": 4.9000000000000003552713678800500929355621337890625,
+                    "willPay": 49,
+                    "investment": 48453
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 5,
+                    "value": 37,
+                    "willPay": 371,
+                    "investment": 6422
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 5,
+                    "value": 8.4000000000000003552713678800500929355621337890625,
+                    "willPay": 84,
+                    "investment": 28351
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 5,
+                    "value": 6.5999999999999996447286321199499070644378662109375,
+                    "willPay": 66.5,
+                    "investment": 35936
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 6,
+                    "value": 12,
+                    "willPay": 122.5,
+                    "investment": 19468
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 6,
+                    "value": 109,
+                    "willPay": 1099,
+                    "investment": 2167
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 6,
+                    "value": 11,
+                    "willPay": 117,
+                    "investment": 20332
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 6,
+                    "value": 14,
+                    "willPay": 141.5,
+                    "investment": 16853
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 6,
+                    "value": 14,
+                    "willPay": 141,
+                    "investment": 16905
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 7,
+                    "value": 7.29999999999999982236431605997495353221893310546875,
+                    "willPay": 73,
+                    "investment": 32588
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 7,
+                    "value": 48,
+                    "willPay": 487,
+                    "investment": 4888
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 7,
+                    "value": 9,
+                    "willPay": 90.5,
+                    "investment": 26355
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 7,
+                    "value": 8.9000000000000003552713678800500929355621337890625,
+                    "willPay": 89.5,
+                    "investment": 26537
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 7,
+                    "value": 15,
+                    "willPay": 157.5,
+                    "investment": 15133
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 7,
+                    "value": 20,
+                    "willPay": 206,
+                    "investment": 11571
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 8,
+                    "value": 18,
+                    "willPay": 186,
+                    "investment": 12802
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 8,
+                    "value": 54,
+                    "willPay": 541,
+                    "investment": 4402
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 8,
+                    "value": 18,
+                    "willPay": 182.5,
+                    "investment": 13035
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 8,
+                    "value": 13,
+                    "willPay": 139,
+                    "investment": 17158
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 8,
+                    "value": 28,
+                    "willPay": 281.5,
+                    "investment": 8462
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 8,
+                    "value": 36,
+                    "willPay": 363,
+                    "investment": 6561
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 7,
+                    "horseNo2": 8,
+                    "value": 36,
+                    "willPay": 363.5,
+                    "investment": 6548
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 9,
+                    "value": 14,
+                    "willPay": 144.5,
+                    "investment": 16463
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 9,
+                    "value": 78,
+                    "willPay": 783,
+                    "investment": 3041
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 9,
+                    "value": 14,
+                    "willPay": 147.5,
+                    "investment": 16168
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 9,
+                    "value": 9.699999999999999289457264239899814128875732421875,
+                    "willPay": 97.5,
+                    "investment": 24463
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 9,
+                    "value": 23,
+                    "willPay": 231,
+                    "investment": 10299
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 9,
+                    "value": 25,
+                    "willPay": 259.5,
+                    "investment": 9178
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 7,
+                    "horseNo2": 9,
+                    "value": 34,
+                    "willPay": 342,
+                    "investment": 6957
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 8,
+                    "horseNo2": 9,
+                    "value": 40,
+                    "willPay": 409,
+                    "investment": 5818
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 10,
+                    "value": 20,
+                    "willPay": 208.5,
+                    "investment": 11410
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 10,
+                    "value": 80,
+                    "willPay": 803.5,
+                    "investment": 2964
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 10,
+                    "value": 13,
+                    "willPay": 133,
+                    "investment": 17899
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 10,
+                    "value": 21,
+                    "willPay": 217,
+                    "investment": 10968
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 10,
+                    "value": 40,
+                    "willPay": 403.5,
+                    "investment": 5901
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 10,
+                    "value": 46,
+                    "willPay": 467,
+                    "investment": 5099
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 7,
+                    "horseNo2": 10,
+                    "value": 30,
+                    "willPay": 302,
+                    "investment": 7884
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 8,
+                    "horseNo2": 10,
+                    "value": 43,
+                    "willPay": 430,
+                    "investment": 5535
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 9,
+                    "horseNo2": 10,
+                    "value": 49,
+                    "willPay": 492.5,
+                    "investment": 4837
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 11,
+                    "value": 52,
+                    "willPay": 526.5,
+                    "investment": 4521
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 11,
+                    "value": 207,
+                    "willPay": 2079.5,
+                    "investment": 1145
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 11,
+                    "value": 51,
+                    "willPay": 516.5,
+                    "investment": 4611
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 11,
+                    "value": 66,
+                    "willPay": 668.5,
+                    "investment": 3561
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 11,
+                    "value": 146,
+                    "willPay": 1464.5,
+                    "investment": 1626
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 11,
+                    "value": 126,
+                    "willPay": 1266,
+                    "investment": 1881
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 7,
+                    "horseNo2": 11,
+                    "value": 98,
+                    "willPay": 984,
+                    "investment": 2420
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 8,
+                    "horseNo2": 11,
+                    "value": 143,
+                    "willPay": 1435,
+                    "investment": 1659
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 9,
+                    "horseNo2": 11,
+                    "value": 58,
+                    "willPay": 583,
+                    "investment": 4084
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 10,
+                    "horseNo2": 11,
+                    "value": 119,
+                    "willPay": 1197.5,
+                    "investment": 1988
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 1,
+                    "horseNo2": 12,
+                    "value": 27,
+                    "willPay": 273,
+                    "investment": 8722
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 2,
+                    "horseNo2": 12,
+                    "value": 99,
+                    "willPay": 992.5,
+                    "investment": 2399
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 3,
+                    "horseNo2": 12,
+                    "value": 27,
+                    "willPay": 270.5,
+                    "investment": 8799
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 4,
+                    "horseNo2": 12,
+                    "value": 36,
+                    "willPay": 363,
+                    "investment": 6556
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 5,
+                    "horseNo2": 12,
+                    "value": 66,
+                    "willPay": 662.5,
+                    "investment": 3594
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 6,
+                    "horseNo2": 12,
+                    "value": 91,
+                    "willPay": 910,
+                    "investment": 2616
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 7,
+                    "horseNo2": 12,
+                    "value": 52,
+                    "willPay": 526.5,
+                    "investment": 4523
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 8,
+                    "horseNo2": 12,
+                    "value": 85,
+                    "willPay": 855,
+                    "investment": 2784
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 9,
+                    "horseNo2": 12,
+                    "value": 64,
+                    "willPay": 641,
+                    "investment": 3714
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 10,
+                    "horseNo2": 12,
+                    "value": 55,
+                    "willPay": 556,
+                    "investment": 4281
+                },
+                {
+                    "type": "place-quin",
+                    "horseNo1": 11,
+                    "horseNo2": 12,
+                    "value": 73,
+                    "willPay": 730,
+                    "investment": 3262
+                }
+            ],
+            "totalInvestment": 865823,
+            "raceLegs": [],
+            "cached": true,
+            "baseline": null
+        }
+    },
+    "success": true,
+    "extra": []
+}
