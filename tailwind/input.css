@@ -93,6 +93,35 @@
     @apply mt-1 w-full border border-ink-edge bg-ink-soft px-2 py-1 text-[11px] text-paper-soft hover:border-brass hover:text-brass;
   }
 
+  .hrp-tool-frame-wrap {
+    @apply overflow-hidden border border-ink-line bg-ink-mid/60;
+    min-height: 70vh;
+  }
+
+  .hrp-tool-frame-wrap--short {
+    min-height: 420px;
+  }
+
+  .hrp-tool-frame {
+    @apply block w-full border-0;
+    height: 75vh;
+    min-height: 560px;
+    background: #0f1419;
+  }
+
+  .hrp-tool-frame-wrap--short .hrp-tool-frame {
+    height: 420px;
+    min-height: 420px;
+  }
+
+  .hrp-gann-figure {
+    @apply border border-ink-line bg-ink-mid/60 p-3 text-center;
+  }
+
+  .hrp-gann-img {
+    @apply mx-auto h-auto max-w-full;
+  }
+
   .hrp-footer {
     @apply mt-6 border-t border-ink-line bg-ink-soft/80;
   }

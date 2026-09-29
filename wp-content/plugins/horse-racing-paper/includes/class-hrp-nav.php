@@ -90,6 +90,7 @@ final class HRP_Nav
             }
             $out[] = [
                 'key' => $def['key'],
+                'type' => 'posts',
                 'label' => $def['label'],
                 'category' => $resolved,
                 'archive' => $archive,
@@ -97,8 +98,98 @@ final class HRP_Nav
                 'limit' => $limit,
                 'posts' => $posts,
             ];
+
+            // Insert interactive tools after 賽事分析 (before Mark Six groups).
+            if ($def['key'] === 'racing_analysis') {
+                $out[] = self::data_tools_group();
+            }
         }
         return $out;
+    }
+
+    /**
+     * Static tool links — legacy /00 analysis hub + Gann (not WP categories).
+     *
+     * @return array{key:string,type:string,label:string,archive:string,links:array<int,array{key:string,label:string,url:string,meta:string}>,posts:array,limit:int,category:string,has_category:bool}
+     */
+    public static function data_tools_group(): array
+    {
+        $hub = self::page_url('racing-analysis', home_url('/racing-analysis/'));
+        $gann = self::page_url('mark-six-gann-chart', home_url('/mark-six-gann-chart/'));
+        if ($gann === home_url('/mark-six-gann-chart/')) {
+            $alt = self::page_url('mark-six-gann', '');
+            if ($alt !== '') {
+                $gann = $alt;
+            }
+        }
+
+        $tabs = [
+            ['key' => 'dashboard', 'label' => '分析儀表板', 'tab' => 'dashboard', 'meta' => '總覽'],
+            ['key' => 'horses', 'label' => '馬匹勝率榜', 'tab' => 'horses', 'meta' => 'Horses'],
+            ['key' => 'trainers', 'label' => '練馬師勝率榜', 'tab' => 'trainers', 'meta' => 'Trainers'],
+            ['key' => 'jockeys', 'label' => '騎師勝率榜', 'tab' => 'jockeys', 'meta' => 'Jockeys'],
+            ['key' => 'jockey_trainer', 'label' => '騎練合作分析', 'tab' => 'jockey_trainer', 'meta' => 'Jockey × Trainer'],
+            ['key' => 'track', 'label' => '場地性能分析', 'tab' => 'track', 'meta' => 'Track'],
+            ['key' => 'jockey_barrier', 'label' => '騎師檔位偏好', 'tab' => 'jockey_barrier', 'meta' => 'Barrier'],
+            ['key' => 'prediction', 'label' => '勝率預測', 'tab' => 'prediction', 'meta' => 'Prediction'],
+            ['key' => 'odds', 'label' => '賠率趨勢分析', 'tab' => 'odds', 'meta' => 'Odds'],
+            ['key' => 'upcoming', 'label' => '即時賽事分析', 'tab' => 'upcoming', 'meta' => 'Upcoming'],
+        ];
+
+        $links = [];
+        foreach ($tabs as $tab) {
+            $url = add_query_arg('tab', $tab['tab'], $hub);
+            if (function_exists('hrp_link_cache_bust')) {
+                $url = hrp_link_cache_bust($url);
+            }
+            $links[] = [
+                'key' => $tab['key'],
+                'label' => $tab['label'],
+                'url' => $url,
+                'meta' => $tab['meta'],
+            ];
+        }
+
+        $gann_url = $gann;
+        if (function_exists('hrp_link_cache_bust')) {
+            $gann_url = hrp_link_cache_bust($gann_url);
+        }
+        $links[] = [
+            'key' => 'm6_gann',
+            'label' => '六合彩江恩圖',
+            'url' => $gann_url,
+            'meta' => 'Gann Mark Six',
+        ];
+
+        $archive = $hub;
+        if (function_exists('hrp_link_cache_bust')) {
+            $archive = hrp_link_cache_bust($archive);
+        }
+
+        return [
+            'key' => 'data_tools',
+            'type' => 'links',
+            'label' => '數據分析',
+            'category' => '',
+            'archive' => $archive,
+            'has_category' => false,
+            'limit' => count($links),
+            'posts' => [],
+            'links' => $links,
+        ];
+    }
+
+    /**
+     * Permalink for a published page slug, or $fallback.
+     */
+    public static function page_url(string $slug, string $fallback = ''): string
+    {
+        $page = get_page_by_path($slug);
+        if ($page instanceof WP_Post && $page->post_status === 'publish') {
+            $url = get_permalink($page);
+            return $url ? (string) $url : $fallback;
+        }
+        return $fallback;
     }
 
     /**

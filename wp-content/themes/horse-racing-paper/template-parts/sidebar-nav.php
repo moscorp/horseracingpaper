@@ -1,7 +1,7 @@
 <?php
 /**
  * Left hierarchical menu — native <details> accordion.
- * Summary row toggles open/close; archive is a separate small link.
+ * Post groups + static 數據分析 tool links.
  *
  * @package Horse_Racing_Paper
  */
@@ -16,11 +16,14 @@ $groups = class_exists('HRP_Nav') ? HRP_Nav::groups() : [];
         <p class="px-2.5 py-2 text-[12px] text-paper-dim">請啟用自由馬紙外掛以載入側欄。</p>
     <?php else : ?>
         <?php foreach ($groups as $index => $group) :
+            $type = (string) ($group['type'] ?? 'posts');
             $limit = (int) ($group['limit'] ?? 6);
             $nav_posts = $group['posts'] ?? [];
+            $nav_links = $group['links'] ?? [];
             $archive = !empty($group['archive']) ? (string) $group['archive'] : '';
-            // Only the first group starts open; user can collapse it via the caret.
-            $open = $index === 0;
+            $on_tools = is_page(['racing-analysis', 'mark-six-gann-chart', 'mark-six-gann']);
+            // First content group open by default; expand 數據分析 when viewing a tool page.
+            $open = (($group['key'] ?? '') === 'data_tools') ? $on_tools : ($index === 0 && !$on_tools);
             ?>
             <details class="hrp-nav-group" data-nav-group="<?php echo esc_attr($group['key']); ?>"<?php echo $open ? ' open' : ''; ?>>
                 <summary class="hrp-nav-heading">
@@ -33,8 +36,30 @@ $groups = class_exists('HRP_Nav') ? HRP_Nav::groups() : [];
                     <span class="hrp-nav-caret" aria-hidden="true"></span>
                 </summary>
                 <div class="hrp-nav-panel">
-                    <?php if (!$nav_posts) : ?>
-                        <p class="px-2.5 pb-2 text-[11px] text-paper-dim">暫無文章（分類：<?php echo esc_html($group['category']); ?>）</p>
+                    <?php if ($type === 'links') : ?>
+                        <?php if (!$nav_links) : ?>
+                            <p class="px-2.5 pb-2 text-[11px] text-paper-dim">暫無分析工具。</p>
+                        <?php else : ?>
+                            <ul class="hrp-nav-list">
+                                <?php foreach ($nav_links as $link) :
+                                    $href = (string) ($link['url'] ?? '');
+                                    if ($href === '') {
+                                        continue;
+                                    }
+                                    ?>
+                                    <li>
+                                        <a href="<?php echo esc_url($href); ?>">
+                                            <?php echo esc_html((string) ($link['label'] ?? '')); ?>
+                                            <?php if (!empty($link['meta'])) : ?>
+                                                <span class="hrp-nav-meta"><?php echo esc_html((string) $link['meta']); ?></span>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    <?php elseif (!$nav_posts) : ?>
+                        <p class="px-2.5 pb-2 text-[11px] text-paper-dim">暫無文章（分類：<?php echo esc_html($group['category'] ?? ''); ?>）</p>
                     <?php else : ?>
                         <ul class="hrp-nav-list">
                             <?php foreach ($nav_posts as $i => $nav_post) :
