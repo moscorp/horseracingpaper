@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .hrp-admin {
+    @apply font-sans text-[13px] leading-snug text-slate-800;
+  }
+
+  .hrp-admin h1 {
+    @apply mb-3 mt-1 text-xl font-semibold text-slate-900;
+  }
+
+  .hrp-admin-grid {
+    @apply mb-3 grid grid-cols-2 gap-2 md:grid-cols-4;
+  }
+
+  .hrp-admin-card {
+    @apply border border-slate-300 bg-white px-2.5 py-2 text-xs;
+  }
+
+  .hrp-admin-card strong {
+    @apply mb-1 block font-semibold text-slate-500;
+  }
+
+  .hrp-admin-table {
+    @apply w-full border-collapse bg-white text-xs;
+  }
+
+  .hrp-admin-table th,
+  .hrp-admin-table td {
+    @apply border border-slate-200 px-2 py-1.5 align-top text-left;
+  }
+
+  .hrp-admin-table thead th {
+    @apply bg-slate-100 font-semibold;
+  }
+
+  .hrp-admin-table code {
+    @apply text-[11px];
+  }
+
+  .hrp-admin .hrp-field-row {
+    @apply grid gap-1 border-b border-slate-200 py-2 md:grid-cols-[160px_1fr];
+  }
+
+  .hrp-admin .hrp-field-label {
+    @apply pt-1 text-xs font-semibold text-slate-600;
+  }
+
+  .hrp-admin .hrp-preview {
+    @apply mt-2 flex items-center gap-3;
+  }
+
+  .hrp-admin .hrp-preview img {
+    @apply max-h-16 border border-slate-200 bg-slate-900 object-contain;
+  }
+
+  .hrp-admin textarea.hrp-legal {
+    @apply min-h-[160px] w-full max-w-3xl font-mono text-xs;
+  }
+
+  .hrp-admin .hrp-section-head {
+    @apply mb-1 mt-4 border-b border-slate-200 pb-1 text-sm font-semibold text-slate-800;
+  }
+}

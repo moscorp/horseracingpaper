@@ -1,0 +1,11 @@
+{
+  "name": "horse-racing-paper",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./tailwind/input.css -o ./wp-content/themes/horse-racing-paper/assets/css/hrp.css --minify && tailwindcss -i ./tailwind/admin-input.css -o ./wp-content/plugins/horse-racing-paper/admin/css/hrp-admin.css --minify && tailwindcss -i ./tailwind/race-day-input.css -o ./wp-content/plugins/horse-racing-paper/public/css/hrp-race-day.css --minify",
+    "watch:css": "tailwindcss -i ./tailwind/input.css -o ./wp-content/themes/horse-racing-paper/assets/css/hrp.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

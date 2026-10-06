@@ -7,10 +7,13 @@ name: Deploy theme & plugin to Namecheap
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "cursor/**"
     paths:
       - "wp-content/themes/horse-racing-paper/**"
       - "wp-content/plugins/horse-racing-paper/**"
+      - "deploy/**"
       - ".github/workflows/deploy-hrp.yml"
 
 jobs:
@@ -88,9 +91,155 @@ jobs:
 
           upload_tree(Path("wp-content/themes/horse-racing-paper"), "wp-content/themes/horse-racing-paper")
           upload_tree(Path("wp-content/plugins/horse-racing-paper"), "wp-content/plugins/horse-racing-paper")
+
+          def rm_tree(remote: str):
+              """Best-effort wipe of LiteSpeed / WP page-cache dirs so stale HTML dies."""
+              try:
+                  ftp.cwd(root)
+                  ftp.cwd(remote)
+              except Exception as e:
+                  print("skip wipe", remote, e)
+                  return
+              print("wipe", remote, "pwd", ftp.pwd())
+
+              def wipe(cwd_label=""):
+                  try:
+                      entries = list(ftp.mlsd())
+                  except Exception:
+                      try:
+                          names = ftp.nlst()
+                      except Exception as e:
+                          print("list fail", e)
+                          return
+                      entries = [(n, {}) for n in names if n not in (".", "..")]
+                  for name, facts in entries:
+                      if name in (".", ".."):
+                          continue
+                      typ = (facts or {}).get("type", "")
+                      try:
+                          if typ == "dir" or (not typ and _is_dir(name)):
+                              ftp.cwd(name)
+                              wipe(name)
+                              ftp.cwd("..")
+                              try:
+                                  ftp.rmd(name)
+                                  print("RMD", cwd_label + "/" + name)
+                              except Exception as e:
+                                  print("rmd fail", name, e)
+                          else:
+                              ftp.delete(name)
+                              print("DELE", cwd_label + "/" + name)
+                      except Exception as e:
+                          print("wipe entry fail", name, e)
+
+              def _is_dir(name):
+                  cur = ftp.pwd()
+                  try:
+                      ftp.cwd(name)
+                      ftp.cwd(cur)
+                      return True
+                  except Exception:
+                      return False
+
+              wipe(remote)
+              ftp.cwd(root)
+
+          for cache_path in (
+              "wp-content/cache/litespeed",
+              "wp-content/litespeed",
+              "wp-content/cache",
+          ):
+              rm_tree(cache_path)
+
+          # Prepend .htaccess 302 → ?hrpv= so plain pretty URLs bypass stale LS public cache.
+          import io, re
+          bust_path = Path("deploy/hrp-htaccess-bust.conf")
+          hrp_block = bust_path.read_text(encoding="utf-8").strip() + "\n"
+          begin, end = "# BEGIN HRP Cache Bust", "# END HRP Cache Bust"
+          ftp.cwd(root)
+          existing = ""
+          try:
+              buf = io.BytesIO()
+              ftp.retrbinary("RETR .htaccess", buf.write)
+              existing = buf.getvalue().decode("utf-8", "replace")
+              print("loaded .htaccess bytes", len(existing))
+          except Exception as e:
+              print("no existing .htaccess", e)
+
+          if begin in existing:
+              existing = re.sub(
+                  re.escape(begin) + r"[\s\S]*?" + re.escape(end) + r"\n?",
+                  "",
+                  existing,
+              )
+          new_ht = hrp_block + "\n" + existing.lstrip("\n")
+          ftp.storbinary("STOR .htaccess", io.BytesIO(new_ht.encode("utf-8")))
+          print("wrote .htaccess with HRP cache-bust redirect", len(new_ht))
+
           ftp.quit()
           print("SUCCESS")
           PY
 
+      - name: Purge LiteSpeed HTML cache + smoke check
+        run: |
+          set -euo pipefail
+          TOKEN=$(python3 - <<'PY'
+          import hashlib
+          print(hashlib.sha1(b'hrp-static-purge-v1').hexdigest()[:24])
+          PY
+          )
+          # WP-bootstrap purge (LiteSpeed Cache plugin + response header)
+          curl -fsSL -A 'HRP-Deploy/1.0' \
+            "https://buycarl.com/wp-content/plugins/horse-racing-paper/bin/hrp-purge-once.php?k=${TOKEN}&t=$(date +%s)" \
+            -o /tmp/hrp-purge-out.txt || true
+          cat /tmp/hrp-purge-out.txt || true
+          curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
+          # Menu links use ?hrpv=
+          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.11")
+          printf '%s' "$vered" > /tmp/hrp-single-vered.html
+          grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
+          grep -q '賽後回顧' /tmp/hrp-single-vered.html
+          if grep -q 'hrp-single post-19391' /tmp/hrp-single-vered.html; then
+            echo "FAIL: versioned URL still wrong" >&2
+            exit 1
+          fi
+          plain_code=$(curl -sS -o /tmp/hrp-plain-body.html -w '%{http_code}' -A 'HRP-Deploy/1.0' \
+            -L "https://buycarl.com/race-review-2026-09-23-happyvalley/")
+          echo "plain follow-redirects http=$plain_code"
+          grep -q 'hrp-single post-19372' /tmp/hrp-plain-body.html
+          echo "Smoke OK — plain URL redirects to fresh race-review content"
+
+          # Legacy /00 crons must NOT get the ?hrpv= 302 (cron-job.org fails on 302).
+          for cron_path in \
+            /00/HKJCOddsManager_cron.php \
+            /00/cron_odds2db.php \
+            /00/HKJCHorseHistoryBatchManager_sync.php \
+            /00/cron_stheadline.php
+          do
+            code=$(curl -sS -o /tmp/hrp-cron-body.txt -w '%{http_code}' -A 'HRP-Deploy/1.0' \
+              "https://buycarl.com${cron_path}")
+            echo "cron ${cron_path} http=${code}"
+            if [ "$code" = "302" ] || [ "$code" = "301" ]; then
+              echo "FAIL: ${cron_path} still redirected (cache-bust leaking onto /00)" >&2
+              exit 1
+            fi
+            if [ "$code" != "200" ] && [ "$code" != "204" ]; then
+              echo "WARN: ${cron_path} returned ${code} (not a redirect; script-level issue)" >&2
+            fi
+          done
+          echo "Smoke OK — /00 cron URLs are not redirected"
+
+          home=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrpv=0.3.11")
+          printf '%s' "$home" > /tmp/hrp-home-tools.html
+          grep -q 'data-nav-group="data_tools"' /tmp/hrp-home-tools.html
+          grep -q '數據分析' /tmp/hrp-home-tools.html
+          grep -q '馬匹勝率榜' /tmp/hrp-home-tools.html
+          grep -q '六合彩江恩圖' /tmp/hrp-home-tools.html
+          tools=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/racing-analysis/?tab=horses&hrpv=0.3.11")
+          printf '%s' "$tools" > /tmp/hrp-tools.html
+          grep -q 'HKJC_race_analysis.php' /tmp/hrp-tools.html
+          grep -q 'tab=horses' /tmp/hrp-tools.html
+          echo "Smoke OK — 數據分析 nav + racing-analysis embed"
+
       - name: Summary
-        run: echo "Deployed theme + plugin. Activate in WP Admin (see docs/ACTIVATION.md)." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "Deployed theme + plugin; purged caches; smoke-checked singles + data tools." >> "$GITHUB_STEP_SUMMARY"
