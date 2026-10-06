@@ -41,9 +41,9 @@ if ($img_url === '') {
 
 get_header();
 ?>
-<div class="hrp-layout flex-col md:flex-row">
+<div class="hrp-layout hrp-layout--wide flex-col md:flex-row">
     <?php get_template_part('template-parts/sidebar', 'nav'); ?>
-    <main class="hrp-main">
+    <main class="hrp-main hrp-main--wide">
         <article class="hrp-tool-page" data-hrp-tool="gann">
             <h1 class="mb-1 font-display text-xl font-bold text-brass">六合彩江恩圖</h1>
             <p class="mb-3 text-[12px] text-paper-dim">

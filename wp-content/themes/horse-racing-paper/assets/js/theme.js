@@ -61,8 +61,42 @@
     );
   }
 
+  /**
+   * Same-origin /00 tool iframes ship max-width:1400px — inject full-bleed CSS.
+   */
+  function widenToolFrame(iframe) {
+    if (!iframe || iframe.getAttribute('data-hrp-widen-ready') === '1') {
+      return;
+    }
+    function apply() {
+      try {
+        var doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        if (!doc || !doc.head) {
+          return;
+        }
+        if (doc.getElementById('hrp-widen-embed')) {
+          iframe.setAttribute('data-hrp-widen-ready', '1');
+          return;
+        }
+        var style = doc.createElement('style');
+        style.id = 'hrp-widen-embed';
+        style.textContent =
+          'html,body{width:100%!important;max-width:none!important;}' +
+          '.container,.app-content,.app{max-width:none!important;width:100%!important;}' +
+          'table{width:100%!important;}';
+        doc.head.appendChild(style);
+        iframe.setAttribute('data-hrp-widen-ready', '1');
+      } catch (err) {
+        /* cross-origin or not ready */
+      }
+    }
+    iframe.addEventListener('load', apply);
+    apply();
+  }
+
   function boot() {
     document.querySelectorAll('[data-hrp-nav]').forEach(initNav);
+    document.querySelectorAll('iframe[data-hrp-widen="1"]').forEach(widenToolFrame);
   }
 
   if (document.readyState === 'loading') {

@@ -41,15 +41,16 @@ $src = add_query_arg('tab', $tab, $src);
 
 get_header();
 ?>
-<div class="hrp-layout flex-col md:flex-row">
+<div class="hrp-layout hrp-layout--wide flex-col md:flex-row">
     <?php get_template_part('template-parts/sidebar', 'nav'); ?>
-    <main class="hrp-main">
+    <main class="hrp-main hrp-main--wide">
         <article class="hrp-tool-page" data-hrp-tool="racing-analysis" data-tab="<?php echo esc_attr($tab); ?>">
             <h1 class="mb-1 font-display text-xl font-bold text-brass">賽馬分析 · <?php echo esc_html($labels[$tab]); ?></h1>
             <p class="mb-3 text-[12px] text-paper-dim">數據分析工具（舊系統即時數據）</p>
             <div class="hrp-tool-frame-wrap">
                 <iframe
                     class="hrp-tool-frame"
+                    data-hrp-widen="1"
                     title="<?php echo esc_attr($labels[$tab]); ?>"
                     src="<?php echo esc_url($src); ?>"
                     loading="lazy"
