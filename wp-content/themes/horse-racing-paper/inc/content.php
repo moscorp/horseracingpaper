@@ -13,13 +13,17 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Strip leading emoji / symbol noise from titles for denser chrome.
+ * Strip leading/trailing emoji noise from titles for denser chrome.
+ * WP titles often store emoji as &#x1f3c7; entities — decode first.
  */
 function hrp_display_title(string $title): string
 {
-    $clean = preg_replace('/^[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{FE0F}\x{200D}\s]+/u', '', $title);
-    $clean = is_string($clean) ? trim($clean) : trim($title);
-    return $clean !== '' ? $clean : $title;
+    $decoded = html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $emoji = '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{FE0F}\x{200D}\s]+';
+    $clean = preg_replace('/^' . $emoji . '/u', '', $decoded);
+    $clean = is_string($clean) ? preg_replace('/' . $emoji . '$/u', '', $clean) : $decoded;
+    $clean = is_string($clean) ? trim($clean, " \t\n\r\0\x0B-–—|") : trim($decoded);
+    return $clean !== '' ? $clean : trim($decoded);
 }
 
 /**

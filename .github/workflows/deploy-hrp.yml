@@ -195,7 +195,7 @@ jobs:
           cat /tmp/hrp-purge-out.txt || true
           curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrp_purge=1&t=$(date +%s)" -o /tmp/hrp-home.html
           # Menu links use ?hrpv=
-          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.12")
+          vered=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/race-review-2026-09-23-happyvalley/?hrpv=0.3.13")
           printf '%s' "$vered" > /tmp/hrp-single-vered.html
           grep -q 'hrp-single post-19372' /tmp/hrp-single-vered.html
           grep -qE '賽後回顧|賽事結果' /tmp/hrp-single-vered.html
@@ -236,22 +236,34 @@ jobs:
           done
           echo "Smoke OK — /00 cron URLs are not redirected"
 
-          home=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrpv=0.3.12")
+          home=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/?hrpv=0.3.13")
           printf '%s' "$home" > /tmp/hrp-home-tools.html
           grep -q 'data-nav-group="data_tools"' /tmp/hrp-home-tools.html
           grep -q '數據分析' /tmp/hrp-home-tools.html
           grep -q '馬匹勝率榜' /tmp/hrp-home-tools.html
           grep -q '六合彩江恩圖' /tmp/hrp-home-tools.html
-          tools=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/racing-analysis/?tab=horses&hrpv=0.3.12")
+          tools=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/racing-analysis/?tab=horses&hrpv=0.3.13")
           printf '%s' "$tools" > /tmp/hrp-tools.html
           grep -q 'HKJC_race_analysis.php' /tmp/hrp-tools.html
           grep -q 'tab=horses' /tmp/hrp-tools.html
           echo "Smoke OK — 數據分析 nav + racing-analysis embed"
 
-          analysis=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/hv-racing-analysis-23/?hrpv=0.3.12")
+          analysis=$(curl -fsSL -A 'HRP-Deploy/1.0' "https://buycarl.com/hv-racing-analysis-23/?hrpv=0.3.13")
           printf '%s' "$analysis" > /tmp/hrp-analysis-single.html
           grep -q 'hrp-single-title' /tmp/hrp-analysis-single.html
           grep -q '賽事分析' /tmp/hrp-analysis-single.html
+          # Display title should not keep leading emoji entities.
+          python3 - <<'PY2'
+import re
+from pathlib import Path
+html=Path('/tmp/hrp-analysis-single.html').read_text(errors='ignore')
+m=re.search(r'class="hrp-single-title"[^>]*>(.*?)</h1>', html, re.S)
+assert m, 'missing hrp-single-title'
+title=m.group(1)
+if '&#x1f' in title.lower() or '&#128' in title:
+    raise SystemExit('FAIL: hrp-single-title still has emoji entity: '+title[:120])
+print('Smoke OK — display title without emoji entity')
+PY2
           if grep -qi '#667eea' /tmp/hrp-analysis-single.html; then
             echo "FAIL: analysis single still ships purple #667eea" >&2
             exit 1
