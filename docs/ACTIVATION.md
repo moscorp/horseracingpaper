@@ -6,10 +6,18 @@ After deploy (Actions → **Deploy theme & plugin to Namecheap**, or merge to `m
 
 1. WordPress admin → **外觀 → 佈景主題** → activate **Horse Racing Paper**
 2. **外掛** → activate **Horse Racing Paper**
-3. **設定 → 閱讀**：首頁顯示可維持「最新文章」或靜態頁；主題 `front-page.php` 會顯示賽事紙 + 最新分析
-4. Optional: **設定 → 一般** 將網站標題改為「賽馬報紙」
-5. Open **賽馬報紙** admin menu → confirm「最近賽日」shows data from `hkracing_*`
-6. Visit https://buycarl.com/ — dense race table should load
+3. **設定 → 閱讀**：首頁顯示可維持「最新文章」或靜態頁；主題 `front-page.php` 會顯示賽事紙 + 左側階層選單
+4. Optional: **設定 → 一般** 將網站標題改為「自由馬紙」
+5. Open **自由馬紙** admin menu → **設定**：
+   - 上傳站徽 Logo / Favicon（可改掉主題內建預設）
+   - 確認側欄四個分類名稱（賽事結果 / 賽事分析 / 六合彩結果 / 六合彩分析）
+   - 編輯關於我們 / 私隱政策 / 使用條款（儲存後同步到 `about` / `privacy` / `terms` 頁面）
+6. Confirm「最近賽日」shows data from `hkracing_*`
+7. Visit https://buycarl.com/ — dense race table + left nav should load
+
+## Tailwind
+
+Frontend + HRP admin use compiled Tailwind CSS (`npm run build:css` in repo root). Deployed CSS lives under theme/plugin `assets` / `admin/css` / `public/css`. No Node required on the server.
 
 ## Security (important)
 
