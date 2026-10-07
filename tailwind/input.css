@@ -346,4 +346,61 @@
     padding: 0.35rem 0.5rem;
     vertical-align: middle;
   }
+
+  /* —— Single post chrome (off alids / storefront look) —— */
+  .hrp-single {
+    @apply min-w-0;
+  }
+
+  .hrp-single-head {
+    @apply mb-3 border-b border-ink-line pb-3;
+  }
+
+  .hrp-single-kicker {
+    @apply mb-1 mt-0 text-[11px] font-semibold tracking-wide text-brass;
+  }
+
+  .hrp-single-kicker a {
+    @apply text-brass hover:underline;
+  }
+
+  .hrp-single-title {
+    @apply m-0 font-display text-xl font-bold leading-snug text-paper md:text-2xl;
+  }
+
+  .hrp-single-meta {
+    @apply mb-0 mt-2 flex flex-wrap items-center gap-x-2 text-[12px] text-paper-dim;
+  }
+
+  .hrp-single-meta-sep {
+    @apply text-paper-dim;
+  }
+
+  .hrp-content--single {
+    @apply overflow-x-auto;
+  }
+
+  .hrp-content--single > div {
+    max-width: 100% !important;
+  }
+
+  .hrp-single-adjacent {
+    @apply mt-6 grid gap-3 border-t border-ink-line pt-4 md:grid-cols-2;
+  }
+
+  .hrp-adjacent-link {
+    @apply block border border-ink-line bg-ink-mid/50 px-3 py-2 hover:border-brass;
+  }
+
+  .hrp-adjacent-link--next {
+    @apply md:text-right;
+  }
+
+  .hrp-adjacent-label {
+    @apply block text-[11px] font-semibold tracking-wide text-brass;
+  }
+
+  .hrp-adjacent-title {
+    @apply mt-1 block text-[13px] leading-snug text-paper;
+  }
 }

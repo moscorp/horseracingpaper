@@ -73,7 +73,7 @@ $groups = class_exists('HRP_Nav') ? HRP_Nav::groups() : [];
                                 ?>
                                 <li<?php echo $i >= $limit ? ' class="hrp-nav-extra" hidden' : ''; ?>>
                                     <a href="<?php echo esc_url($href); ?>">
-                                        <?php echo esc_html(get_the_title($nav_post)); ?>
+                                        <?php echo esc_html(function_exists('hrp_display_title') ? hrp_display_title(get_the_title($nav_post)) : get_the_title($nav_post)); ?>
                                         <span class="hrp-nav-meta"><?php echo esc_html(get_the_date('Y-m-d', $nav_post)); ?></span>
                                     </a>
                                 </li>

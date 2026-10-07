@@ -18,7 +18,7 @@ $featured = $latest[0] ?? null;
                 <p class="mb-1 text-[11px] font-semibold tracking-wide text-paper-dim">最新文章</p>
                 <h1 class="m-0 font-display text-xl font-bold text-brass md:text-2xl">
                     <a class="hover:underline" href="<?php echo esc_url(get_permalink($featured)); ?>">
-                        <?php echo esc_html(get_the_title($featured)); ?>
+                        <?php echo esc_html(hrp_display_title(get_the_title($featured))); ?>
                     </a>
                 </h1>
                 <p class="mt-1 text-[12px] text-paper-dim">
@@ -40,7 +40,7 @@ $featured = $latest[0] ?? null;
                     <?php foreach (array_slice($latest, 1) as $recent_post) : ?>
                         <li class="border-b border-ink-line py-1.5">
                             <a class="text-[13px] text-paper hover:text-brass" href="<?php echo esc_url(get_permalink($recent_post)); ?>">
-                                <?php echo esc_html(get_the_title($recent_post)); ?>
+                                <?php echo esc_html(hrp_display_title(get_the_title($recent_post))); ?>
                                 <span class="ml-2 text-[11px] text-paper-dim"><?php echo esc_html(get_the_date('Y-m-d', $recent_post)); ?></span>
                             </a>
                         </li>

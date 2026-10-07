@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Horse Racing Paper
  * Description: 自由馬紙（Carl's Racing Paper）— racing data, Mark Six, funds email, cron registry, dense admin console. Replaces legacy /00 scripts over time.
- * Version: 0.3.11
+ * Version: 0.3.12
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Moscorp
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('HRP_VERSION', '0.3.11');
+define('HRP_VERSION', '0.3.12');
 define('HRP_PLUGIN_FILE', __FILE__);
 define('HRP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HRP_PLUGIN_URL', plugin_dir_url(__FILE__));

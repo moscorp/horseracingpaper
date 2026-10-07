@@ -9,6 +9,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once get_template_directory() . '/inc/content.php';
+
 /**
  * Theme asset version — filemtime so CDN/browser cannot keep stale JS/CSS.
  */
